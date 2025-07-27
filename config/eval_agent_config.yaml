@@ -1,0 +1,116 @@
+# EvalAgent Integration Configuration
+# Configuration for quality evaluation and feedback system
+
+evaluation:
+  # Minimum score thresholds
+  thresholds:
+    min_score: 0.7          # Minimum score to pass predictions
+    regeneration_threshold: 0.5  # Below this, attempt regeneration
+    broadcast_threshold: 0.6     # Higher threshold for broadcast messages
+    
+  # Quality criteria weights
+  criteria_weights:
+    accuracy: 0.3           # Astrological accuracy
+    clarity: 0.25           # Language clarity and readability
+    tone: 0.2               # Positive and engaging tone
+    completeness: 0.15      # Coverage of relevant aspects
+    personalization: 0.1    # User-specific customization
+    
+  # Language-specific configurations
+  language_settings:
+    english:
+      tone_requirements: ["positive", "encouraging", "professional"]
+      max_length: 500
+      min_length: 100
+      forbidden_words: ["death", "disaster", "failure"]
+      
+    marathi:
+      tone_requirements: ["सकारात्मक", "प्रेरणादायक", "व्यावसायिक"]
+      max_length: 600
+      min_length: 120
+      forbidden_words: ["मृत्यू", "आपत्ती", "अपयश"]
+
+feedback:
+  # User feedback collection
+  collection:
+    enable_ratings: true
+    enable_comments: true
+    prompt_frequency: "after_prediction"  # after_prediction, weekly, monthly
+    
+  # Feedback processing
+  processing:
+    auto_analyze: true
+    sentiment_analysis: true
+    pattern_detection: true
+    
+  # Improvement triggers
+  improvement_triggers:
+    low_rating_threshold: 5     # Ratings below this trigger review
+    consecutive_low_ratings: 3  # Multiple low ratings trigger action
+    feedback_volume_threshold: 10  # Minimum feedback for analysis
+
+analytics:
+  # Statistics tracking
+  tracking:
+    user_specific: true
+    global_metrics: true
+    prediction_type_breakdown: true
+    language_performance: true
+    
+  # Reporting
+  reports:
+    daily_summary: true
+    weekly_analysis: true
+    monthly_deep_dive: true
+    
+  # Performance monitoring
+  monitoring:
+    score_trending: true
+    user_satisfaction: true
+    regeneration_rates: true
+    
+integration:
+  # EvalAgent connection
+  connection:
+    endpoint: "http://localhost:8080/eval"  # EvalAgent service endpoint
+    timeout: 30                             # Request timeout in seconds
+    retry_attempts: 3                       # Number of retry attempts
+    
+  # Fallback behavior
+  fallback:
+    on_service_unavailable: "use_basic_checks"  # use_basic_checks, skip_evaluation
+    on_timeout: "accept_prediction"             # accept_prediction, reject_prediction
+    on_error: "log_and_continue"                # log_and_continue, fail_gracefully
+    
+  # A/B testing
+  ab_testing:
+    enabled: true
+    test_percentage: 10     # Percentage of predictions to A/B test
+    comparison_generators: ["v1", "v2"]  # Generator versions to compare
+    
+# Logging and debugging
+logging:
+  eval_decisions: true      # Log all evaluation decisions
+  user_feedback: true       # Log user feedback
+  performance_metrics: true # Log performance data
+  debug_predictions: false  # Log full prediction content (privacy sensitive)
+  
+  # Log levels
+  levels:
+    eval_agent: "INFO"
+    feedback: "INFO"
+    analytics: "DEBUG"
+    
+# Advanced features
+advanced:
+  # Machine learning integration
+  ml_features:
+    prediction_improvement: true    # Use ML to improve predictions
+    pattern_recognition: true       # Detect patterns in feedback
+    personalization: true           # Personalize based on user history
+    
+  # External integrations
+  external:
+    google_analytics: false         # Send metrics to GA
+    custom_webhook: ""              # Custom webhook for notifications
+    slack_notifications: false      # Send alerts to Slack

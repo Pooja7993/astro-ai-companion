@@ -1,0 +1,112 @@
+
+english:
+  welcome: "Welcome to Astro AI Companion! 🌟"
+  registration_start: "Let's create your astrological profile."
+  ask_name: "Please enter your full name:"
+  ask_dob: "Please enter your date of birth (DD/MM/YYYY):"
+  ask_tob: "Please enter your time of birth (HH:MM in 24-hour format):"
+  ask_location: "Please enter your birth location (City, Country):"
+  profile_created: "Your profile has been created successfully! ✨"
+  daily_greeting: "Good morning! Here's your daily astrological insight:"
+  remedies_title: "🔮 Recommended Remedies:"
+  master_remedies_title: "⭐ Master Remedies (Top 5):"
+  feedback_prompt: "Please rate your last prediction (1-10) and add a comment:\n/feedback 8 Very accurate!"
+  feedback_thanks: "Thank you! Your feedback helps us improve our predictions. 🌟"
+  feedback_error: "Please use format: /feedback <rating 1-10> <optional comment>"
+  eval_stats_title: "📊 Prediction Quality Statistics:\n\n"
+  stats_error: "Unable to retrieve statistics at this time."
+  prediction_quality_low: "⚠️ Unable to generate a high-quality prediction at this time. Please try again later."
+  help_text: |
+    🌟 *Astro AI Companion Commands*
+    
+    📅 *Predictions:*
+    /daily - Get today's prediction
+    /weekly - Get this week's forecast
+    /monthly - Get this month's prediction
+    
+    🔮 *Remedies & Profile:*
+    /remedies - Get current remedies
+    /profile - View your profile
+    
+    ⚙️ *Settings:*
+    /language - Change language preference
+    
+    📊 *Quality & Feedback:*
+    /feedback <rating> <comment> - Rate predictions
+    /stats - View prediction quality stats
+    
+    ❓ *Help:*
+    /help - Show this help message
+    
+    📱 You can also use the menu buttons below!
+  
+marathi:
+  welcome: "ज्योतिष AI साथीदारामध्ये आपले स्वागत आहे! 🌟"
+  registration_start: "चला आपली ज्योतिषीय प्रोफाइल तयार करूया."
+  ask_name: "कृपया आपले पूर्ण नाव टाका:"
+  ask_dob: "कृपया आपली जन्मतारीख टाका (DD/MM/YYYY):"
+  ask_tob: "कृपया आपला जन्मवेळ टाका (HH:MM 24-तास स्वरूपात):"
+  ask_location: "कृपया आपले जन्मस्थान टाका (शहर, देश):"
+  profile_created: "आपली प्रोफाइल यशस्वीरित्या तयार झाली आहे! ✨"
+  daily_greeting: "सुप्रभात! आजचा आपला ज्योतिषीय अंतर्दृष्टी:"
+  remedies_title: "🔮 शिफारस केलेले उपाय:"
+  master_remedies_title: "⭐ मुख्य उपाय (टॉप 5):"
+  feedback_prompt: "कृपया आपल्या शेवटच्या भविष्यवाणीला रेटिंग द्या (१-१०) आणि टिप्पणी जोडा:\n/feedback 8 अत्यंत अचूक!"
+  feedback_thanks: "धन्यवाद! आपला अभिप्राय आम्हाला सुधारण्यास मदत करतो. 🌟"
+  feedback_error: "कृपया हे फॉर्मेट वापरा: /feedback <रेटिंग १-१०> <ऐच्छिक टिप्पणी>"
+  eval_stats_title: "📊 भविष्यवाणी गुणवत्ता आकडेवारी:\n\n"
+  stats_error: "सध्या आकडेवारी मिळवण्यात अक्षम."
+  prediction_quality_low: "⚠️ सध्या उच्च-गुणवत्तेची भविष्यवाणी तयार करण्यात अक्षम. कृपया नंतर पुन्हा प्रयत्न करा."
+  help_text: |
+    🌟 *ज्योतिष AI साथीदार आदेश*
+    
+    📅 *भविष्यवाणी:*
+    /daily - आजची भविष्यवाणी मिळवा
+    /weekly - या आठवड्याचे अंदाज मिळवा
+    /monthly - या महिन्याची भविष्यवाणी मिळवा
+    
+    🔮 *उपाय आणि प्रोफाइल:*
+    /remedies - सध्याचे उपाय मिळवा
+    /profile - आपली प्रोफाइल पहा
+    
+    ⚙️ *सेटिंग्ज:*
+    /language - भाषा प्राधान्य बदला
+    
+    📊 *गुणवत्ता आणि अभिप्राय:*
+    /feedback <रेटिंग> <टिप्पणी> - भविष्यवाणीला रेटिंग द्या
+    /stats - भविष्यवाणी गुणवत्ता आकडेवारी पहा
+    
+    ❓ *मदत:*
+    /help - हा मदत संदेश दाखवा
+    
+    📱 आपण खालील मेनू बटन देखील वापरू शकता!
+
+prediction_types:
+  english:
+    daily: "Daily Prediction"
+    weekly: "Weekly Forecast"
+    monthly: "Monthly Overview"
+    quarterly: "Quarterly Insights"
+    annual: "Annual Forecast"
+    
+  marathi:
+    daily: "दैनिक भविष्यवाणी"
+    weekly: "साप्ताहिक अंदाज"
+    monthly: "मासिक विहंगावलोकन"
+    quarterly: "त्रैमासिक अंतर्दृष्टी"
+    annual: "वार्षिक अंदाज"
+
+remedy_categories:
+  english:
+    gemstone: "Gemstone"
+    color: "Favorable Colors"
+    donation: "Charitable Donations"
+    mantra: "Sacred Mantras"
+    food: "Dietary Recommendations"
+    
+  marathi:
+    gemstone: "रत्न"
+    color: "अनुकूल रंग"
+    donation: "दानधर्म"
+    mantra: "पवित्र मंत्र"
+    food: "आहारविषयक शिफारसी"

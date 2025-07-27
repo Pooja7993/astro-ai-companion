@@ -1,0 +1,38 @@
+# Simple Astro AI Companion - Essential Dependencies Only
+# Personal Family Use - Minimal Dependencies
+
+# Core Framework
+python-telegram-bot>=20.7
+
+# Database
+sqlalchemy>=2.0.0
+
+# Configuration
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-dotenv>=1.0.0
+
+# Logging
+loguru>=0.7.2
+
+# HTTP Client
+httpx>=0.25.2
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Astrology & Calculations
+swisseph>=2.10.0
+flatlib>=0.2.3
+
+# YAML Configuration
+pyyaml>=6.0.1
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Development
+black>=23.11.0
+flake8>=6.1.0 

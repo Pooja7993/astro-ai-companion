@@ -1,0 +1,193 @@
+# Advanced Numerology System
+# Complete numerological analysis with Pythagorean and Chaldean systems
+
+pythagorean_system:
+  letter_values:
+    A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8, I: 9
+    J: 1, K: 2, L: 3, M: 4, N: 5, O: 6, P: 7, Q: 8, R: 9
+    S: 1, T: 2, U: 3, V: 4, W: 5, X: 6, Y: 7, Z: 8
+
+chaldean_system:
+  letter_values:
+    A: 1, B: 2, C: 3, D: 4, E: 5, F: 8, G: 3, H: 5, I: 1
+    J: 1, K: 2, L: 3, M: 4, N: 5, O: 7, P: 8, Q: 1, R: 2
+    S: 3, T: 4, U: 6, V: 6, W: 6, X: 5, Y: 1, Z: 7
+
+life_path_meanings:
+  1:
+    keywords: ["leadership", "independence", "innovation", "pioneering"]
+    personality: "Natural leader with strong willpower and determination"
+    career: "Entrepreneur, executive, inventor, politician"
+    challenges: "Impatience, arrogance, dominating nature"
+    lucky_numbers: [1, 10, 19, 28]
+    lucky_colors: ["red", "orange", "yellow"]
+    
+  2:
+    keywords: ["cooperation", "sensitivity", "diplomacy", "partnership"]
+    personality: "Peaceful mediator with strong intuition and emotional intelligence"
+    career: "Counselor, diplomat, teacher, healthcare worker"
+    challenges: "Over-sensitivity, indecisiveness, dependency"
+    lucky_numbers: [2, 11, 20, 29]
+    lucky_colors: ["blue", "green", "silver"]
+    
+  3:
+    keywords: ["creativity", "communication", "optimism", "artistic"]
+    personality: "Creative communicator with natural charm and artistic abilities"
+    career: "Artist, writer, entertainer, designer, speaker"
+    challenges: "Scattered energy, superficiality, mood swings"
+    lucky_numbers: [3, 12, 21, 30]
+    lucky_colors: ["yellow", "orange", "pink"]
+    
+  4:
+    keywords: ["stability", "organization", "hard work", "reliability"]
+    personality: "Practical and systematic with strong work ethic"
+    career: "Engineer, accountant, manager, builder, banker"
+    challenges: "Rigidity, pessimism, narrow-mindedness"
+    lucky_numbers: [4, 13, 22, 31]
+    lucky_colors: ["green", "brown", "gray"]
+    
+  5:
+    keywords: ["freedom", "adventure", "versatility", "curiosity"]
+    personality: "Dynamic and versatile with love for freedom and change"
+    career: "Travel agent, journalist, salesperson, performer"
+    challenges: "Restlessness, irresponsibility, addiction tendency"
+    lucky_numbers: [5, 14, 23]
+    lucky_colors: ["bright colors", "multicolor", "turquoise"]
+    
+  6:
+    keywords: ["nurturing", "responsibility", "healing", "service"]
+    personality: "Caring and responsible with strong desire to help others"
+    career: "Doctor, nurse, teacher, counselor, chef"
+    challenges: "Perfectionism, meddling, self-sacrifice"
+    lucky_numbers: [6, 15, 24]
+    lucky_colors: ["blue", "pink", "white"]
+    
+  7:
+    keywords: ["spirituality", "analysis", "mystery", "intuition"]
+    personality: "Deep thinker with strong spiritual inclinations and analytical mind"
+    career: "Researcher, scientist, mystic, analyst, investigator"
+    challenges: "Isolation, skepticism, secretiveness"
+    lucky_numbers: [7, 16, 25]
+    lucky_colors: ["purple", "violet", "indigo"]
+    
+  8:
+    keywords: ["material success", "authority", "ambition", "power"]
+    personality: "Ambitious and authoritative with strong business acumen"
+    career: "Business leader, banker, real estate, politician"
+    challenges: "Materialism, ruthlessness, power hunger"
+    lucky_numbers: [8, 17, 26]
+    lucky_colors: ["black", "brown", "dark blue"]
+    
+  9:
+    keywords: ["universal love", "completion", "wisdom", "humanitarian"]
+    personality: "Wise humanitarian with broad perspective and generous nature"
+    career: "Philanthropist, healer, artist, spiritual teacher"
+    challenges: "Impractical idealism, emotional instability"
+    lucky_numbers: [9, 18, 27]
+    lucky_colors: ["red", "crimson", "pink"]
+
+master_numbers:
+  11:
+    meaning: "Spiritual messenger and intuitive leader"
+    keywords: ["intuition", "inspiration", "psychic abilities", "enlightenment"]
+    career: "Spiritual teacher, psychologist, counselor, artist"
+    challenges: "High sensitivity, nervous tension, unrealistic expectations"
+    
+  22:
+    meaning: "Master builder with practical idealism"
+    keywords: ["master builder", "practical vision", "large-scale projects"]
+    career: "Architect, urban planner, international business, large organizations"
+    challenges: "Overwhelming responsibilities, inner tension, high expectations"
+    
+  33:
+    meaning: "Master teacher with universal compassion"
+    keywords: ["master teacher", "universal love", "healing abilities"]
+    career: "Spiritual guide, healer, humanitarian leader, inspirational speaker"
+    challenges: "Burden of responsibility, sacrifice of personal desires"
+
+karmic_debt_numbers:
+  13:
+    meaning: "Karmic debt related to misuse of power in past life"
+    challenges: "Must learn discipline and hard work to overcome laziness"
+    lessons: "Focus, determination, honest effort"
+    remedies: ["Regular meditation", "Disciplined routine", "Avoid shortcuts"]
+    
+  14:
+    meaning: "Karmic debt related to abuse of freedom"
+    challenges: "Must learn moderation and avoid excess"
+    lessons: "Balance, self-control, responsibility"
+    remedies: ["Maintain balance", "Avoid addictions", "Practice moderation"]
+    
+  16:
+    meaning: "Karmic debt related to ego and pride"
+    challenges: "Must overcome ego and learn humility"
+    lessons: "Humility, spiritual growth, inner development"
+    remedies: ["Practice humility", "Serve others", "Spiritual practices"]
+    
+  19:
+    meaning: "Karmic debt related to misuse of power and selfish leadership"
+    challenges: "Must learn to consider others and avoid selfishness"
+    lessons: "Selfless service, cooperation, team work"
+    remedies: ["Help others", "Work in teams", "Practice selflessness"]
+
+compatibility_matrix:
+  1: [1, 5, 7]  # Most compatible numbers
+  2: [2, 4, 8]
+  3: [3, 6, 9]
+  4: [2, 4, 8]
+  5: [1, 5, 9]
+  6: [3, 6, 9]
+  7: [1, 7, 8]
+  8: [2, 4, 8]
+  9: [3, 5, 9]
+
+personal_year_cycle:
+  1: "New beginnings, start projects, leadership opportunities"
+  2: "Cooperation, patience, relationship focus, slow growth"
+  3: "Creative expression, communication, social activities"
+  4: "Hard work, organization, building foundations"
+  5: "Change, travel, freedom, new experiences"
+  6: "Family, responsibility, service, home matters"
+  7: "Introspection, spiritual growth, analysis, study"
+  8: "Material achievement, business success, recognition"
+  9: "Completion, endings, humanitarian service, wisdom"
+
+lucky_timing:
+  life_path_1:
+    lucky_days: ["Sunday", "Monday"]
+    lucky_months: [1, 10]
+    lucky_dates: [1, 10, 19, 28]
+    avoid_dates: [8, 17, 26]
+    
+  life_path_2:
+    lucky_days: ["Monday", "Friday"]
+    lucky_months: [2, 7, 11]
+    lucky_dates: [2, 7, 11, 16, 20, 25, 29]
+    avoid_dates: [1, 10, 19, 28]
+
+business_numerology:
+  business_name_calculation: "Use Chaldean system for business names"
+  favorable_numbers: [1, 3, 5, 6, 9]
+  avoid_numbers: [4, 8] # Can bring challenges in business
+  
+  business_types:
+    creative_business: [3, 6, 9]
+    technical_business: [1, 4, 7, 8]
+    service_business: [2, 6, 9]
+    financial_business: [8, 1, 4]
+
+remedial_numerology:
+  name_correction:
+    method: "Add or modify letters to achieve desired number"
+    consultation: "Professional numerologist recommended for major changes"
+    
+  gemstone_numerology:
+    1: ["Ruby", "Garnet", "Red Coral"]
+    2: ["Pearl", "Moonstone", "White Coral"] 
+    3: ["Topaz", "Citrine", "Amber"]
+    4: ["Emerald", "Green Tourmaline", "Jade"]
+    5: ["Diamond", "White Sapphire", "Zircon"]
+    6: ["Blue Sapphire", "Lapis Lazuli", "Turquoise"]
+    7: ["Cat's Eye", "Tiger's Eye", "Amethyst"]
+    8: ["Black Onyx", "Hematite", "Obsidian"]
+    9: ["Red Coral", "Carnelian", "Bloodstone"]
