@@ -23,8 +23,7 @@ pandas>=2.0.0
 numpy>=1.24.0
 
 # Astrology & Calculations
-swisseph>=2.10.0
-flatlib>=0.2.3
+ephem>=4.1.4
 
 # YAML Configuration
 pyyaml>=6.0.1

@@ -14,7 +14,7 @@ from telegram.ext import ContextTypes
 from src.database.database import db_manager
 from src.database.models import User, FamilyMember
 from src.family.family_manager import family_manager
-from src.astrology.real_astrology_engine import astrology_engine
+from src.astrology.simple_astrology_engine import astrology_engine
 from src.utils.multi_language import multi_lang
 from src.utils.logging_setup import get_logger
 
