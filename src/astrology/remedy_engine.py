@@ -8,7 +8,7 @@ import yaml
 from pathlib import Path
 from datetime import datetime
 
-from src.utils.config import Config
+from src.utils.config_simple import Config
 
 
 class RemedyEngine:

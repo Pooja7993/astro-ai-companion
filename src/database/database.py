@@ -12,7 +12,7 @@ from datetime import datetime
 from loguru import logger
 
 from src.database.models import User, FamilyMember
-from src.utils.config import get_config
+from src.utils.config_simple import get_config
 
 logger = get_logger(__name__)
 

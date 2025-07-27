@@ -15,7 +15,7 @@ from loguru import logger
 
 from src.astrology.simple_chart_analyzer import chart_analyzer
 from src.database.models import User
-from src.utils.config import get_config
+from src.utils.config_simple import get_config
 from src.family.family_recommendations import family_recommendations
 
 logger = get_logger(__name__)

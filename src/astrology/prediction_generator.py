@@ -9,7 +9,7 @@ import random
 import yaml
 from pathlib import Path
 
-from src.utils.config import Config
+from src.utils.config_simple import Config
 
 
 class PredictionGenerator:

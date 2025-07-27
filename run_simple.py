@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from src.telegram_bot.bot_simple import SimpleAstroBot
-from src.utils.config import get_config
+from src.utils.config_simple import get_config
 from loguru import logger
 
 # Configure logging
