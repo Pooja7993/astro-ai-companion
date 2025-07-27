@@ -13,7 +13,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 
 from loguru import logger
 
-from src.astrology.chart_analyzer import ChartAnalyzer
+from src.astrology.simple_chart_analyzer import chart_analyzer
 from src.database.models import User
 from src.utils.config import get_config
 from src.family.family_recommendations import family_recommendations

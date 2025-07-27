@@ -9,7 +9,7 @@ from datetime import datetime
 
 from src.database.database import db_manager
 from src.database.models import User, FamilyMember
-from src.astrology.chart_analyzer import ChartAnalyzer
+from src.astrology.simple_chart_analyzer import chart_analyzer
 from src.utils.logging_setup import get_logger
 
 logger = get_logger(__name__)
