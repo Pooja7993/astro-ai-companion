@@ -91,6 +91,12 @@ class SimpleAstroBot:
         self.application.add_handler(CommandHandler('transits', self.transits_command))
         self.application.add_handler(CommandHandler('yogas', self.yogas_command))
 
+        # NEW: Moon & Festival commands
+        self.application.add_handler(CommandHandler('moon', self.moon_phase_command))
+        self.application.add_handler(CommandHandler('festivals', self.festivals_command))
+        self.application.add_handler(CommandHandler('auspicious', self.auspicious_command))
+        self.application.add_handler(CommandHandler('health', self.health_command))
+
         # Adaptive learning commands
         self.application.add_handler(CommandHandler('adaptive', self.adaptive_recommendation_command))
 
@@ -1001,89 +1007,72 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
             await update.message.reply_text("❌ Error processing your question. Please try again.")
 
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show help information."""
-        help_msg = """🌟 **Astro AI Companion - Help Guide**
+        """Handle /help command."""
+        if not update.effective_user or not update.message:
+            return
+        
+        help_text = """🌟 **Astro AI Companion Help** 🌟
 
-**📋 Available Commands:**
+**🌙 Core Commands:**
+/start - Start the bot
+/register - Create your profile
+/edit_profile - Update your profile
+/profile - View your details
+/help - Show this help
 
-**🎯 Basic Commands:**
-• `/start` - Welcome message and introduction
-• `/register` - Create your personal profile
-• `/edit_profile` - Update your profile details
-• `/profile` - View your personal details
-• `/commands` - Complete list of all commands
-• `/help` - Show this help message
+**📅 Predictions:**
+/daily - Today's cosmic guidance
+/weekly - This week's forecast
+/monthly - Monthly overview
+/yearly - Annual predictions
 
-**📅 Prediction Commands:**
-• `/daily` - Today's cosmic guidance (with advanced analytics & adaptive learning)
-• `/weekly` - This week's forecast
-• `/monthly` - Monthly overview
-• `/yearly` - Annual predictions
+**🌙 New Moon & Festival Features:**
+/moon - Current moon phase guidance
+/festivals - Upcoming festivals
+/auspicious - Auspicious days
+/health - Health & wellness guidance
 
 **🔮 Advanced Analytics:**
-• `/analytics` - Comprehensive astrology analysis
-• `/dasha` - Current dasha period information
-• `/transits` - Current planetary transits
-• `/yogas` - Active yogas in your chart
+/analytics - Comprehensive analysis
+/dasha - Current dasha period
+/transits - Planetary transits
+/yogas - Active yogas
 
-**🖼️ Voice & Chart Features:**
-• `/chart` - Generate your birth chart image
-• `/prediction_image` - Get prediction as beautiful image
-• `/voice_prediction` - Voice prediction (coming soon)
+**🖼️ Voice & Charts:**
+/chart - Generate birth chart
+/prediction_image - Prediction as image
+/voice_prediction - Voice prediction
 
-**🤖 AI & Learning:**
-• `/ai` - Advanced AI chat (requires Ollama)
-• `/ai model:prompt` - Use specific LLM model
-• `/adaptive` - Get personalized adaptive recommendations
+**🤖 AI Features:**
+/ai - Advanced AI chat
+/adaptive - Adaptive recommendations
+
+**👨‍👩‍👧‍👦 Family:**
+/family_recommendations - Family guidance
+/family_members - View family members
 
 **💫 Personal Guidance:**
-• `/personal` - Personal life guidance
-• `/family` - Family and relationship insights
-• `/health` - Health and wellness guidance
-• `/relationships` - Love and relationship advice
-• `/spiritual` - Spiritual growth guidance
-• `/life_purpose` - Life purpose and career guidance
+/personal - Personal life guidance
+/family - Family insights
+/health - Health guidance
+/relationships - Relationship advice
+/spiritual - Spiritual growth
+/life_purpose - Life purpose guidance
 
-**👨‍👩‍👧‍👦 Family Commands:**
-• `/family_recommendations` - Family peace, harmony, health, wealth & happiness
-• `/family_members` - View registered family members
+**📊 Optional Features:**
+/progress - Track progress
+/goals - View goals
+/set_goal - Set new goals
+/timing - Timing recommendations
+/rituals - Family rituals
 
-**🔮 Consultation Commands:**
-• `/ask [question]` - Ask specific questions
-• `/remedies` - Personalized remedies
+**🔮 Consultation:**
+/ask [question] - Ask specific questions
+/remedies - Personalized remedies
 
-**📊 Optional Enhancements:**
-• `/progress` - Track your progress and achievements
-• `/goals` - View and manage your goals
-• `/set_goal` - Set new family or personal goals
-• `/timing` - Get personalized timing recommendations
-• `/rituals` - View custom family rituals
-
-**💬 Natural Conversation:**
-You can also chat with me naturally! Just type your questions or thoughts, and I'll provide personalized guidance based on your birth chart.
-
-**👨‍👩‍👧‍👦 Family Features:**
-• Personal birth chart analysis
-• Family compatibility insights
-• Individual guidance for each family member
-• Private and secure for your family only
-
-**💎 Example Questions:**
-• "How's my day looking?"
-• "What should I focus on today?"
-• "How can I improve my relationships?"
-• "What's my life purpose?"
-• "How can I grow spiritually?"
-
-**🌟 Your Personal Astrology Guide:**
-I'm designed specifically for you and your family, providing personalized cosmic guidance for your personal growth and family harmony.
-
-**💡 Feedback System:**
-Rate predictions with 👍 or 👎 to help personalize your experience!
-
-Need help with anything specific? Just ask! ✨"""
-
-        await update.message.reply_text(help_msg, parse_mode='Markdown')
+**Need more details? Use /commands for complete list!** ✨"""
+        
+        await update.message.reply_text(help_text)
 
     async def family_recommendations_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle family recommendations command."""
@@ -1285,56 +1274,83 @@ Use these timings for best results! ✨"""
             "Example:\nJohn|A.|Doe|1990-01-15|14:30|Mumbai, India|en\n\nLanguage: en (English) or mr (Marathi)")
 
     async def commands_list(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Show complete list of available commands."""
-        commands_msg = """📋 **Complete Command List**
+        """Handle /commands command."""
+        if not update.effective_user or not update.message:
+            return
+        
+        commands_text = """📋 **Complete Commands List** 📋
 
-**👤 Profile Commands:**
-• `/start` - Welcome message and introduction
-• `/register` - Create your profile (first time only)
-• `/edit_profile` - Update your profile details
-• `/profile` - View your current profile
-• `/commands` - Show this complete command list
+**🌙 Core Commands:**
+/start - Start the bot
+/register - Create your profile
+/edit_profile - Update your profile
+/profile - View your details
+/help - Show help guide
+/commands - This commands list
 
-**🔮 Prediction Commands:**
-• `/daily` - Get your daily prediction
-• `/weekly` - Get your weekly forecast
-• `/monthly` - Get your monthly insights
-• `/yearly` - Get your yearly predictions
+**📅 Prediction Commands:**
+/daily - Today's cosmic guidance
+/weekly - This week's forecast
+/monthly - Monthly overview
+/yearly - Annual predictions
 
-**🎯 Personal Guidance:**
-• `/personal` - Personal life guidance
-• `/health` - Health and wellness guidance
-• `/relationships` - Relationship advice
-• `/spiritual` - Spiritual growth guidance
-• `/life_purpose` - Life purpose discovery
+**🌙 NEW: Moon & Festival Features:**
+/moon - Current moon phase guidance
+/festivals - Upcoming festivals (30 days)
+/auspicious - Auspicious days (14 days)
+/health - Health & wellness guidance
+
+**🔮 Advanced Analytics:**
+/analytics - Comprehensive astrology analysis
+/dasha - Current dasha period information
+/transits - Current planetary transits
+/yogas - Active yogas in your chart
+
+**🖼️ Voice & Chart Features:**
+/chart - Generate your birth chart image
+/prediction_image - Get prediction as beautiful image
+/voice_prediction - Voice prediction (coming soon)
+
+**🤖 AI-Powered Chat:**
+/ai - Advanced AI chat (requires Ollama)
+/ai model:prompt - Use specific LLM model
+
+**💫 Personal Guidance:**
+/personal - Personal life guidance
+/family - Family and relationship insights
+/health - Health and wellness guidance
+/relationships - Love and relationship advice
+/spiritual - Spiritual growth guidance
+/life_purpose - Life purpose and career guidance
 
 **👨‍👩‍👧‍👦 Family Commands:**
-• `/family` - Family relationship guidance
-• `/family_recommendations` - Family recommendations
-• `/family_members` - View registered family members
+/family_recommendations - Family peace, harmony, health, wealth & happiness
+/family_members - View registered family members
 
-**🛠️ Utility Commands:**
-• `/remedies` - Get astrological remedies
-• `/ask` - Ask me anything
-• `/help` - Quick help guide
+**🔮 Consultation Commands:**
+/ask [question] - Ask specific questions
+/remedies - Personalized remedies
 
-**✨ Optional Enhancements:**
-• `/progress` - Track your progress
-• `/goals` - View your goals
-• `/set_goal` - Set new goals
-• `/timing` - Best timing for activities
-• `/rituals` - Custom family rituals
+**📊 Optional Enhancement Commands:**
+/progress - Track your progress and achievements
+/goals - View and manage your goals
+/set_goal - Set new family or personal goals
+/timing - Get personalized timing recommendations
+/rituals - View custom family rituals
 
-**💬 Natural Chat:**
-Just type anything naturally - I'll respond with personalized guidance!
+**🤖 AI & Learning:**
+/adaptive - Get personalized adaptive recommendations
 
-**🌐 Language Support:**
-• English (en) - Default
-• Marathi (mr) - Set in profile
+**Examples:**
+• `/ai What should I focus on today?`
+• `/ai mistral:Give me a health prediction`
+• `/moon` - Get moon phase guidance
+• `/festivals` - See upcoming festivals
+• `/health` - Get wellness guidance
 
-Use any command or just chat naturally! ✨"""
+**Natural conversation also works!** Just type anything naturally! 🌟"""
         
-        await update.message.reply_text(commands_msg, parse_mode='Markdown')
+        await update.message.reply_text(commands_text)
 
     async def family_members_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show registered family members."""
@@ -1587,6 +1603,191 @@ Current planetary transits influence your:
         except Exception as e:
             logger.error(f"Yogas error: {e}")
             await update.message.reply_text("❌ Error showing yogas. Please try again.")
+
+    async def moon_phase_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /moon command for moon phase guidance."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            from src.astrology.moon_phase_engine import MoonPhaseEngine
+            moon_engine = MoonPhaseEngine()
+            moon_phase = moon_engine.get_current_moon_phase()
+            
+            message = f"""🌙 **Moon Phase Guidance** - {datetime.now().strftime('%B %d, %Y')}
+
+**Current Phase:** {moon_phase.phase.replace('_', ' ').title()}
+**Illumination:** {moon_phase.illumination:.1%}
+**Moon Age:** {moon_phase.age:.1f} days
+
+**Guidance:**
+{moon_phase.guidance}
+
+**Recommended Remedies:**
+{chr(10).join([f"• {remedy}" for remedy in moon_phase.remedies])}
+
+**Next Full Moon:** {moon_phase.next_full.strftime('%B %d, %Y')}
+**Next New Moon:** {moon_phase.next_new.strftime('%B %d, %Y')}
+
+**Use this lunar energy wisely!** 🌙✨"""
+            
+            await update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Moon phase error: {e}")
+            await update.message.reply_text(
+                "❌ **Moon Phase Error**\n\n"
+                "Sorry, there was an error getting moon phase information.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
+    
+    async def festivals_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /festivals command for upcoming festivals."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            from src.astrology.festival_calendar import FestivalCalendar
+            festival_calendar = FestivalCalendar()
+            upcoming_festivals = festival_calendar.get_upcoming_festivals(30)
+            
+            if not upcoming_festivals:
+                await update.message.reply_text(
+                    "📅 **No Upcoming Festivals**\n\n"
+                    "No major festivals in the next 30 days.\n"
+                    "Use `/auspicious` to check auspicious days instead!"
+                )
+                return
+            
+            message = "📅 **Upcoming Festivals**\n\n"
+            
+            for festival in upcoming_festivals:
+                days_until = (festival.date - datetime.now()).days
+                message += f"""🎉 **{festival.name}** - {festival.date.strftime('%B %d, %Y')}
+**Days until:** {days_until} days
+**Significance:** {festival.significance}
+
+**Quick Rituals:**
+{chr(10).join([f"• {ritual}" for ritual in festival.rituals[:2]])}
+
+**Family Activities:**
+{chr(10).join([f"• {activity}" for activity in festival.family_activities[:2]])}
+
+---
+"""
+            
+            message += "\n**Use `/festival_details` for complete guidance!** 🙏"
+            
+            await update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Festivals error: {e}")
+            await update.message.reply_text(
+                "❌ **Festival Error**\n\n"
+                "Sorry, there was an error getting festival information.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
+    
+    async def auspicious_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /auspicious command for auspicious days."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            from src.astrology.festival_calendar import FestivalCalendar
+            festival_calendar = FestivalCalendar()
+            auspicious_days = festival_calendar.get_auspicious_days(datetime.now(), 14)
+            
+            if not auspicious_days:
+                await update.message.reply_text(
+                    "📅 **Auspicious Days**\n\n"
+                    "No highly auspicious days in the next 14 days.\n"
+                    "Every day has its own blessings! 🙏"
+                )
+                return
+            
+            message = "📅 **Auspicious Days (Next 14 Days)**\n\n"
+            
+            for day in auspicious_days:
+                message += f"""✨ **{day['date']}** - {day['day_name']}
+**Reason:** {day['reason']}
+
+**Recommended Activities:**
+{chr(10).join([f"• {activity}" for activity in day['activities']])}
+
+---
+"""
+            
+            await update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Auspicious days error: {e}")
+            await update.message.reply_text(
+                "❌ **Auspicious Days Error**\n\n"
+                "Sorry, there was an error getting auspicious days.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
+    
+    async def health_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /health command for health and wellness guidance."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            from src.astrology.health_wellness_engine import HealthWellnessEngine
+            health_engine = HealthWellnessEngine()
+            
+            # Get user for birth time
+            user = self._get_user_sync(update.effective_user.id)
+            if not user:
+                await update.message.reply_text(
+                    "❌ **Health Guidance Error**\n\n"
+                    "Please register first with `/register` to get personalized health guidance."
+                )
+                return
+            
+            # Get seasonal health tips
+            seasonal_tips = health_engine.get_seasonal_health_tips()
+            current_season = seasonal_tips['en']
+            
+            # Get exercise timing
+            exercise_timing = health_engine.get_exercise_timing(user.birth_time)
+            
+            # Get daily routine
+            daily_routine = health_engine.get_daily_health_routine()
+            
+            message = f"""🌿 **Health & Wellness Guidance** - {datetime.now().strftime('%B %d, %Y')}
+
+**Current Season:** {current_season['name']}
+**Dosha Focus:** {current_season['dosha']}
+**Description:** {current_season['description']}
+
+**Seasonal Diet:**
+{chr(10).join([f"• {item}" for item in current_season['diet'][:3]])}
+
+**Lifestyle Tips:**
+{chr(10).join([f"• {item}" for item in current_season['lifestyle'][:3]])}
+
+**Best Exercise Time:** {exercise_timing['best_time']}
+**Exercise Type:** {exercise_timing['exercise_type']}
+
+**Daily Health Routine:**
+**Morning:** {daily_routine['morning'][0]}
+**Afternoon:** {daily_routine['afternoon'][0]}
+**Evening:** {daily_routine['evening'][0]}
+**Night:** {daily_routine['night'][0]}
+
+**Use `/health_details` for complete wellness guide!** 🌿✨"""
+            
+            await update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Health guidance error: {e}")
+            await update.message.reply_text(
+                "❌ **Health Guidance Error**\n\n"
+                "Sorry, there was an error getting health guidance.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
 
     def run_sync(self):
         """Run the bot synchronously."""
