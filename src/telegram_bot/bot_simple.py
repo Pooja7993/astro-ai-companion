@@ -18,6 +18,8 @@ from src.database.models import User
 from src.utils.config_simple import get_config
 from src.family.family_recommendations import family_recommendations
 
+import requests
+
 
 class SimpleAstroBot:
     """Simple Astro AI Companion Bot for personal family use."""
@@ -1384,10 +1386,20 @@ Use any command or just chat naturally! ✨"""
         """Handle /ai command for LLM-powered chat via Ollama."""
         if not update.effective_user or not update.message:
             return
+        
         prompt = update.message.text[len('/ai'):].strip()
         if not prompt:
-            await update.message.reply_text("Please provide a prompt. Example: /ai What is my astrological forecast today?")
+            await update.message.reply_text(
+                "🤖 **AI Chat Help**\n\n"
+                "**Usage:**\n"
+                "• `/ai What is my astrological forecast today?`\n"
+                "• `/ai mistral:Give me a prediction for next week`\n"
+                "• `/ai llama3:How can I improve my relationships?`\n\n"
+                "**Available Models:** llama3, mistral, codellama, phi3, gemma\n\n"
+                "**Setup Required:** Install Ollama and run `ollama serve` locally."
+            )
             return
+        
         # Model selection: /ai model:prompt
         if ':' in prompt and prompt.split(':', 1)[0].lower() in ['llama3', 'mistral', 'codellama', 'phi3', 'gemma']:
             model, prompt = prompt.split(':', 1)
@@ -1395,14 +1407,59 @@ Use any command or just chat naturally! ✨"""
             prompt = prompt.strip()
         else:
             model = 'llama3'
-        from src.utils.ollama_client import OllamaClient
-        ollama = OllamaClient()
+        
         try:
-            await update.message.reply_text("Thinking... (using model: {} on Ollama)".format(model))
+            from src.utils.ollama_client import OllamaClient
+            ollama = OllamaClient()
+            
+            # Check if Ollama is available
+            await update.message.reply_text(f"🤖 Thinking... (using {model} on Ollama)")
+            
             response = ollama.chat(prompt, model=model)
-            await update.message.reply_text(response)
+            
+            if response and response.strip():
+                await update.message.reply_text(response)
+            else:
+                await update.message.reply_text(
+                    "❌ **Ollama Error**\n\n"
+                    "**Possible Issues:**\n"
+                    "• Ollama server not running\n"
+                    "• Model not downloaded\n"
+                    "• Network connection issue\n\n"
+                    "**Solutions:**\n"
+                    "1. Start Ollama: `ollama serve`\n"
+                    "2. Download model: `ollama pull {model}`\n"
+                    "3. Check your internet connection\n\n"
+                    "**Fallback:** Try our regular commands like `/daily` or `/personal` for guidance!"
+                )
+                
+        except requests.exceptions.ConnectionError:
+            await update.message.reply_text(
+                "❌ **Ollama Connection Error**\n\n"
+                "**Ollama server is not running or not accessible.**\n\n"
+                "**To fix this:**\n"
+                "1. Install Ollama: [ollama.ai](https://ollama.ai)\n"
+                "2. Start server: `ollama serve`\n"
+                "3. Download model: `ollama pull {model}`\n\n"
+                "**For now, try:**\n"
+                "• `/daily` - Daily prediction\n"
+                "• `/personal` - Personal guidance\n"
+                "• `/family` - Family advice\n\n"
+                "Your astrology companion works perfectly without AI chat! ✨"
+            )
+            
         except Exception as e:
-            await update.message.reply_text(f"❌ Error communicating with Ollama: {e}")
+            logger.error(f"AI command error: {e}")
+            await update.message.reply_text(
+                "❌ **AI Chat Error**\n\n"
+                f"**Error:** {str(e)}\n\n"
+                "**Try these instead:**\n"
+                "• `/daily` - Daily cosmic guidance\n"
+                "• `/analytics` - Advanced astrology analysis\n"
+                "• `/personal` - Personal life guidance\n"
+                "• `/family` - Family recommendations\n\n"
+                "Your astrology companion is here to help! ✨"
+            )
 
     async def analytics_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show comprehensive astrology analytics."""
