@@ -19,7 +19,7 @@ class FamilyManager:
     """Family management system for Astro AI Companion."""
     
     def __init__(self):
-        self.chart_analyzer = ChartAnalyzer()
+        self.chart_analyzer = chart_analyzer
     
     def add_family_member(self, user_id: int, name: str, relationship: str, 
                          birth_date: str = None, birth_time: str = None, 

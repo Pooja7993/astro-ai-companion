@@ -111,6 +111,7 @@ class Config(BaseSettings):
         env_file_encoding = "utf-8"
         case_sensitive = False
         validate_assignment = True
+        extra = "ignore"  # Ignore extra fields
     
     @validator('environment')
     def validate_environment(cls, v):
