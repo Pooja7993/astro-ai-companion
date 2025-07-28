@@ -4,6 +4,9 @@
 # Core Framework
 python-telegram-bot>=20.7
 
+# Web Server (for Render deployment)
+flask>=2.3.0
+
 # Database
 sqlalchemy>=2.0.0
 

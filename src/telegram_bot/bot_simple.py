@@ -33,8 +33,8 @@ class SimpleAstroBot:
         # Initialize bot with conflict prevention
         self.application = Application.builder().token(self.config.telegram.telegram_bot_token.get_secret_value()).build()
         
-        # Add conflict prevention settings
-        self.application.bot.delete_webhook(drop_pending_updates=True)
+        # Note: delete_webhook removed to avoid async warning
+        # The polling mode will handle conflicts automatically
         
         self._register_handlers()
     
