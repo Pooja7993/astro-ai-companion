@@ -25,6 +25,8 @@ class SimpleAstroBot:
     def __init__(self):
         self.config = get_config()
         self.chart_analyzer = chart_analyzer
+        self.pending_registration = {}  # user_id: True if waiting for registration details
+        self.pending_profile_update = {}  # user_id: True if waiting for profile edit details
         
         # Check if telegram token is available
         if not self.config.has_telegram_token():
@@ -117,49 +119,91 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
             return
         
         user_id = str(update.effective_user.id)
-        user_name = update.effective_user.first_name or "User"
-        
-        # Check if user already exists
-        existing_user = self._get_user_sync(user_id)
+        from src.database.database import DatabaseManager
+        db = DatabaseManager()
+        existing_user = db.get_user(user_id)
         if existing_user:
             await update.message.reply_text(
-                f"✅ You're already registered, {user_name}! Use /profile to see your details or chat with me naturally."
-            )
+                f"✅ You're already registered! Use /profile to see your details or /edit_profile to update.")
             return
-        
-        # Guide user through registration
+        self.pending_registration[user_id] = True
         await update.message.reply_text(
-            f"🌟 Welcome {user_name}! Let's create your personal astrological profile.\n\n"
-            "Please provide your birth details in this format:\n"
-            "**Name|Date of Birth|Time of Birth|Place of Birth**\n\n"
-            "Example:\n"
-            "`John Doe|1990-01-15|14:30|Mumbai, India`\n\n"
-            "This will help me provide personalized guidance for you and your family."
-        )
+            "🌟 Let's create your profile!\n\nPlease enter your details in this format:\n"
+            "**First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
+            "Example:\nJohn|A.|Doe|1990-01-15|14:30|Mumbai, India|en\n\nLanguage: en (English) or mr (Marathi)")
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle natural conversation messages."""
         if not update.effective_user or not update.message:
             return
         
-        message_text = update.message.text.strip()
         user_id = str(update.effective_user.id)
-        
-        # Check if this is a registration message
-        if '|' in message_text and len(message_text.split('|')) == 4:
-            await self._handle_registration(update, message_text, user_id)
-            return
-        
-        # Get user
-        user = self._get_user_sync(user_id)
-        if not user:
-            await update.message.reply_text(
-                "❌ Please register first using `/register` to create your personal profile.",
-                parse_mode='Markdown'
+        message_text = update.message.text.strip()
+        from src.database.database import DatabaseManager
+        db = DatabaseManager()
+        if self.pending_registration.get(user_id):
+            # Registration flow
+            parts = message_text.split('|')
+            if len(parts) != 7:
+                await update.message.reply_text(
+                    "❌ Please provide all details in the correct format:\n"
+                    "First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language")
+                return
+            first, middle, last, dob, tob, place, language = [p.strip() for p in parts]
+            if language not in ['en', 'mr']:
+                language = 'en'
+            chat_id = user_id
+            name = f"{first} {middle} {last}".strip()
+            from src.database.models import User
+            user = User(
+                telegram_id=user_id,
+                chat_id=chat_id,
+                name=name,
+                birth_date=dob,
+                birth_time=tob,
+                birth_place=place,
+                language_preference=language,
+                daily_reports_enabled=True,
+                realtime_guidance_enabled=True
             )
+            db.create_user(user)
+            del self.pending_registration[user_id]
+            await update.message.reply_text(f"✅ Profile created for {name}! Use /profile to view.")
             return
-        
-        # Handle general conversation
+        if self.pending_profile_update.get(user_id):
+            # Profile edit flow
+            parts = message_text.split('|')
+            if len(parts) != 7:
+                await update.message.reply_text(
+                    "❌ Please provide all details in the correct format:\n"
+                    "First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language")
+                return
+            first, middle, last, dob, tob, place, language = [p.strip() for p in parts]
+            if language not in ['en', 'mr']:
+                language = 'en'
+            chat_id = user_id
+            name = f"{first} {middle} {last}".strip()
+            from src.database.models import User
+            user = User(
+                telegram_id=user_id,
+                chat_id=chat_id,
+                name=name,
+                birth_date=dob,
+                birth_time=tob,
+                birth_place=place,
+                language_preference=language,
+                daily_reports_enabled=True,
+                realtime_guidance_enabled=True
+            )
+            db.update_user(user)
+            del self.pending_profile_update[user_id]
+            await update.message.reply_text(f"✅ Profile updated for {name}! Use /profile to view.")
+            return
+        # Default: handle as general query
+        user = db.get_user(user_id)
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
         await self._handle_general_query(update, message_text, user)
     
     async def _handle_registration(self, update: Update, message_text: str, user_id: str):
@@ -271,19 +315,9 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
     
     def _get_user_sync(self, telegram_id: str) -> Optional[User]:
         """Get user from database (simplified)."""
-        # In real implementation, query actual database
-        # For now, return a mock user
-        return User(
-            telegram_id=telegram_id,
-            chat_id=telegram_id,  # Added chat_id
-            name="Family Member",
-            birth_date="1990-01-01",
-            birth_time="12:00",
-            birth_place="Mumbai, India",
-            language_preference='en',  # Fixed field name
-            daily_reports_enabled=True,
-            realtime_guidance_enabled=True
-        )
+        from src.database.database import DatabaseManager
+        db = DatabaseManager()
+        return db.get_user(telegram_id)
     
     async def personal_guidance(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Provide comprehensive personal life guidance."""
@@ -1133,24 +1167,17 @@ Use these timings for best results! ✨"""
             return
         
         user_id = str(update.effective_user.id)
-        user_name = update.effective_user.first_name or "User"
-        
-        # Check if user exists
-        existing_user = self._get_user_sync(user_id)
+        from src.database.database import DatabaseManager
+        db = DatabaseManager()
+        existing_user = db.get_user(user_id)
         if not existing_user:
             await update.message.reply_text("❌ Please register first using /register")
             return
-        
-        # Guide user through profile editing
+        self.pending_profile_update[user_id] = True
         await update.message.reply_text(
-            f"✏️ **Edit Profile for {user_name}**\n\n"
-            "Please provide your updated birth details in this format:\n"
-            "**Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
-            "Example:\n"
-            "`John Doe|1990-01-15|14:30|Mumbai, India|en`\n\n"
-            "**Language options:** en (English) or mr (Marathi)\n\n"
-            "This will update your profile and preferences."
-        )
+            "✏️ Please enter your updated details in this format:\n"
+            "**First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
+            "Example:\nJohn|A.|Doe|1990-01-15|14:30|Mumbai, India|en\n\nLanguage: en (English) or mr (Marathi)")
 
     async def commands_list(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Show complete list of available commands."""
