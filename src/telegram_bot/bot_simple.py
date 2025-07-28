@@ -1097,7 +1097,19 @@ Use these timings for best results! ✨"""
 
     def run_sync(self):
         """Run the bot synchronously."""
-        self.application.run_polling()
+        try:
+            # Initialize the bot
+            self.application.initialize()
+            
+            # Start the bot
+            self.application.start()
+            
+            # Run the bot
+            self.application.run_polling()
+            
+        except Exception as e:
+            logger.error(f"Error running bot: {e}")
+            raise
 
     async def run(self):
         """Run the bot asynchronously."""

@@ -60,7 +60,7 @@ class TelegramConfig(BaseSettings):
     message_retry_attempts: int = Field(default=3, description="Message retry attempts")
     
     class Config:
-        env_prefix = "TELEGRAM_"
+        env_prefix = ""
         case_sensitive = False
 
 class SchedulerConfig(BaseSettings):
