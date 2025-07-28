@@ -69,6 +69,7 @@ class SimpleAstroBot:
         self.application.add_handler(CommandHandler('remedies', self.get_remedies))
         self.application.add_handler(CommandHandler('ask', self.handle_question))
         self.application.add_handler(CommandHandler('family_recommendations', self.family_recommendations_command))
+        self.application.add_handler(CommandHandler('ai', self.ai_command))
         
         # Optional enhancements
         self.application.add_handler(CommandHandler('progress', self.show_progress))
@@ -1276,6 +1277,30 @@ Use any command or just chat naturally! ✨"""
         except Exception as e:
             logger.error(f"Family members error: {e}")
             await update.message.reply_text("❌ Error showing family members. Please try again.")
+
+    async def ai_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /ai command for LLM-powered chat via Ollama."""
+        if not update.effective_user or not update.message:
+            return
+        prompt = update.message.text[len('/ai'):].strip()
+        if not prompt:
+            await update.message.reply_text("Please provide a prompt. Example: /ai What is my astrological forecast today?")
+            return
+        # Model selection: /ai model:prompt
+        if ':' in prompt and prompt.split(':', 1)[0].lower() in ['llama3', 'mistral', 'codellama', 'phi3', 'gemma']:
+            model, prompt = prompt.split(':', 1)
+            model = model.strip().lower()
+            prompt = prompt.strip()
+        else:
+            model = 'llama3'
+        from src.utils.ollama_client import OllamaClient
+        ollama = OllamaClient()
+        try:
+            await update.message.reply_text("Thinking... (using model: {} on Ollama)".format(model))
+            response = ollama.chat(prompt, model=model)
+            await update.message.reply_text(response)
+        except Exception as e:
+            await update.message.reply_text(f"❌ Error communicating with Ollama: {e}")
 
     def run_sync(self):
         """Run the bot synchronously."""
