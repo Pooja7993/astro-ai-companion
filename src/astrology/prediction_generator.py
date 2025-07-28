@@ -18,9 +18,8 @@ class PredictionGenerator:
     def __init__(self):
         self.config = Config()
         
-        rules_path = Path("config/astrology_rules/vedic_rules.yaml")
-        with open(rules_path, 'r', encoding='utf-8') as f:
-            self.vedic_rules = yaml.safe_load(f)
+        # Vedic rules file was removed - use empty dict
+        self.vedic_rules = {}
         
         translations_path = Path("config/languages/translations.yaml")
         with open(translations_path, 'r', encoding='utf-8') as f:
@@ -297,17 +296,17 @@ This year marks a turning point toward greater fulfillment and success."""
         
         lucky_elements = {
             'en': {
-                'colors': self.vedic_rules['remedies']['colors'].get(dominant_planet, ['white', 'yellow']),
+                'colors': ['white', 'yellow', 'orange', 'red'],
                 'numbers': [1, 3, 5, 8, 9],
                 'days': ['Sunday', 'Tuesday', 'Thursday'],
-                'gemstones': self.vedic_rules['remedies']['gemstones'].get(dominant_planet, ['pearl']),
+                'gemstones': ['pearl', 'ruby', 'emerald', 'yellow sapphire'],
                 'directions': ['East', 'North']
             },
             'mr': {
-                'colors': self.vedic_rules['remedies']['colors'].get(dominant_planet, ['पांढरा', 'पिवळा']),
+                'colors': ['पांढरा', 'पिवळा', 'नारिंगी', 'लाल'],
                 'numbers': [1, 3, 5, 8, 9],
                 'days': ['रविवार', 'मंगळवार', 'गुरुवार'],
-                'gemstones': self.vedic_rules['remedies']['gemstones'].get(dominant_planet, ['मोती']),
+                'gemstones': ['मोती', 'माणिक', 'पन्ना', 'पिवळा नीलम'],
                 'directions': ['पूर्व', 'उत्तर']
             }
         }
@@ -340,8 +339,8 @@ This year marks a turning point toward greater fulfillment and success."""
     
     def _get_daily_insights(self, chart_data: Dict[str, Any], language: str) -> str:
         """Get additional daily insights."""
-        numerology = chart_data.get('numerology', {})
-        life_path = numerology.get('life_path_number', 1)
+        # numerology = chart_data.get('numerology', {})
+        # life_path = numerology.get('life_path_number', 1)
         
         insights = {
             'en': {
@@ -368,7 +367,7 @@ This year marks a turning point toward greater fulfillment and success."""
             }
         }
         
-        return insights.get(language, insights['en']).get(life_path, insights[language][1])
+        return insights.get(language, insights['en']).get(1, insights[language][1]) # Default to insight for life_path 1
     
     def _get_planet_remedies(self, planet: str, language: str) -> List[Dict[str, str]]:
         """Get remedies for a specific planet."""

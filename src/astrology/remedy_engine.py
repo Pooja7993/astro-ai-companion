@@ -17,9 +17,8 @@ class RemedyEngine:
     def __init__(self):
         self.config = Config()
         
-        rules_path = Path("config/astrology_rules/vedic_rules.yaml")
-        with open(rules_path, 'r', encoding='utf-8') as f:
-            self.vedic_rules = yaml.safe_load(f)
+        # Vedic rules file was removed - use empty dict
+        self.vedic_rules = {}
     
     def generate_comprehensive_remedies(self, chart_data: Dict[str, Any], user_profile: Dict[str, Any]) -> Dict[str, Any]:
         """Generate comprehensive remedy package for a user."""
@@ -28,7 +27,6 @@ class RemedyEngine:
             'immediate_remedies': self._get_immediate_remedies(chart_data, user_profile),
             'master_remedies': self._get_master_remedies(chart_data, user_profile),
             'planetary_remedies': self._get_planetary_remedies(chart_data, user_profile),
-            'lal_kitab_remedies': self._get_lal_kitab_remedies(chart_data, user_profile),
             'lifestyle_remedies': self._get_lifestyle_remedies(chart_data, user_profile),
             'gemstone_recommendations': self._get_gemstone_recommendations(chart_data, user_profile),
             'mantra_recommendations': self._get_mantra_recommendations(chart_data, user_profile),
@@ -193,47 +191,6 @@ class RemedyEngine:
                     planetary_remedies[planet] = remedies
         
         return planetary_remedies
-    
-    def _get_lal_kitab_remedies(self, chart_data: Dict[str, Any], user_profile: Dict[str, Any]) -> List[Dict[str, str]]:
-        """Get Lal Kitab specific remedies."""
-        language = user_profile.get('preferred_language', 'en')
-        lal_kitab_analysis = chart_data.get('lal_kitab_analysis', {})
-        
-        remedies = []
-        
-        if lal_kitab_analysis.get('manglik_status') == 'Manglik':
-            if language == 'en':
-                remedies.extend([
-                    {
-                        'category': 'Lal Kitab',
-                        'title': 'Mars Pacification',
-                        'description': 'Donate red lentils and jaggery every Tuesday to reduce Mars malefic effects.',
-                        'frequency': 'Weekly'
-                    },
-                    {
-                        'category': 'Lal Kitab',
-                        'title': 'Hanuman Worship',
-                        'description': 'Visit Hanuman temple every Tuesday and offer sindoor and oil.',
-                        'frequency': 'Weekly'
-                    }
-                ])
-            else:
-                remedies.extend([
-                    {
-                        'category': 'लाल किताब',
-                        'title': 'मंगळ शांती',
-                        'description': 'मंगळाचे दुष्प्रभाव कमी करण्यासाठी दर मंगळवारी लाल डाळ आणि गूळ दान करा.',
-                        'frequency': 'साप्ताहिक'
-                    },
-                    {
-                        'category': 'लाल किताब',
-                        'title': 'हनुमान पूजा',
-                        'description': 'दर मंगळवारी हनुमान मंदिरात जाऊन सिंदूर आणि तेल अर्पण करा.',
-                        'frequency': 'साप्ताहिक'
-                    }
-                ])
-        
-        return remedies
     
     def _get_lifestyle_remedies(self, chart_data: Dict[str, Any], user_profile: Dict[str, Any]) -> List[Dict[str, str]]:
         """Get lifestyle-based remedies."""

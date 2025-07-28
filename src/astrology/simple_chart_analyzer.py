@@ -25,13 +25,8 @@ class SimpleChartAnalyzer:
         
         self.city_coordinates = self._load_city_coordinates()
         
-        # Load rules if available
-        rules_path = Path("config/astrology_rules/vedic_rules.yaml")
-        if rules_path.exists():
-            with open(rules_path, 'r', encoding='utf-8') as f:
-                self.vedic_rules = yaml.safe_load(f)
-        else:
-            self.vedic_rules = {}
+        # Vedic rules file was removed - use empty dict
+        self.vedic_rules = {}
     
     def _load_city_coordinates(self) -> Dict[str, tuple]:
         """Load offline city coordinates database."""

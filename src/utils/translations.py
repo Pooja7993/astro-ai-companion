@@ -125,7 +125,7 @@ def get_translation(key: str, language: str = 'en') -> str:
 /help - Show this help
 
 *Features:*
-• Personalized Vedic astrology predictions
+• Personalized astrology predictions
 • Daily, weekly, and monthly forecasts
 • Customized remedies and suggestions
 • Master remedies for major life improvements
@@ -153,7 +153,7 @@ For support, contact the administrator.""",
 /help - ही मदत दाखवा
 
 *वैशिष्ट्ये:*
-• वैयक्तिक वैदिक ज्योतिष भविष्यवाणी
+• वैयक्तिक ज्योतिष भविष्यवाणी
 • दैनिक, साप्ताहिक आणि मासिक अंदाज
 • सानुकूलित उपाय आणि सूचना
 • मुख्य जीवन सुधारणांसाठी मास्टर उपाय
