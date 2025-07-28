@@ -1788,6 +1788,102 @@ Current planetary transits influence your:
                 "Sorry, there was an error getting health guidance.\n"
                 "Please try again later or use other commands like `/daily` for guidance."
             )
+    
+    async def chart_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /chart command for birth chart image generation."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            user = self._get_user_sync(update.effective_user.id)
+            if not user:
+                await update.message.reply_text(
+                    "❌ **Chart Generation Error**\n\n"
+                    "Please register first with `/register` to generate your birth chart."
+                )
+                return
+            
+            await update.message.reply_text(
+                "🖼️ **Birth Chart Generation**\n\n"
+                "Generating your birth chart image...\n\n"
+                "**Coming Soon:**\n"
+                "• Beautiful birth chart visualization\n"
+                "• Planetary positions and aspects\n"
+                "• Zodiac signs and houses\n\n"
+                "For now, use `/daily` for your personalized guidance! ✨"
+            )
+            
+        except Exception as e:
+            logger.error(f"Chart generation error: {e}")
+            await update.message.reply_text(
+                "❌ **Chart Generation Error**\n\n"
+                "Sorry, there was an error generating your birth chart.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
+    
+    async def prediction_image_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /prediction_image command for prediction image generation."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            user = self._get_user_sync(update.effective_user.id)
+            if not user:
+                await update.message.reply_text(
+                    "❌ **Prediction Image Error**\n\n"
+                    "Please register first with `/register` to get prediction images."
+                )
+                return
+            
+            await update.message.reply_text(
+                "🖼️ **Prediction Image Generation**\n\n"
+                "Generating your prediction image...\n\n"
+                "**Coming Soon:**\n"
+                "• Beautiful prediction graphics\n"
+                "• Styled cosmic guidance\n"
+                "• Visual astrology insights\n\n"
+                "For now, use `/daily` for your personalized guidance! ✨"
+            )
+            
+        except Exception as e:
+            logger.error(f"Prediction image error: {e}")
+            await update.message.reply_text(
+                "❌ **Prediction Image Error**\n\n"
+                "Sorry, there was an error generating your prediction image.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
+    
+    async def voice_prediction_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /voice_prediction command for voice prediction."""
+        if not update.effective_user or not update.message:
+            return
+        
+        try:
+            user = self._get_user_sync(update.effective_user.id)
+            if not user:
+                await update.message.reply_text(
+                    "❌ **Voice Prediction Error**\n\n"
+                    "Please register first with `/register` to get voice predictions."
+                )
+                return
+            
+            await update.message.reply_text(
+                "🎤 **Voice Prediction**\n\n"
+                "Generating your voice prediction...\n\n"
+                "**Coming Soon:**\n"
+                "• Text-to-speech predictions\n"
+                "• Audio cosmic guidance\n"
+                "• Voice-based insights\n\n"
+                "For now, use `/daily` for your personalized guidance! ✨"
+            )
+            
+        except Exception as e:
+            logger.error(f"Voice prediction error: {e}")
+            await update.message.reply_text(
+                "❌ **Voice Prediction Error**\n\n"
+                "Sorry, there was an error generating your voice prediction.\n"
+                "Please try again later or use other commands like `/daily` for guidance."
+            )
 
     def run_sync(self):
         """Run the bot synchronously."""

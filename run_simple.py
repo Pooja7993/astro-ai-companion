@@ -11,6 +11,13 @@ import sys
 import threading
 from pathlib import Path
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
