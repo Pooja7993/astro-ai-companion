@@ -78,9 +78,12 @@ class SimpleAstroBot:
         self.application.add_handler(CommandHandler('timing', self.show_timing))
         self.application.add_handler(CommandHandler('rituals', self.show_rituals))
         
-        # Message handler for natural conversation
-        self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
-    
+        # Advanced analytics commands
+        self.application.add_handler(CommandHandler('analytics', self.analytics_command))
+        self.application.add_handler(CommandHandler('dasha', self.dasha_command))
+        self.application.add_handler(CommandHandler('transits', self.transits_command))
+        self.application.add_handler(CommandHandler('yogas', self.yogas_command))
+
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /start command."""
         welcome_msg = """🌟 **Welcome to Your Personal Astro AI Companion!**
@@ -610,46 +613,36 @@ Want more specific guidance? Ask me: "What's my true calling?" or "How can I ful
             await update.message.reply_text("❌ Error generating life purpose guidance. Please try again.")
 
     async def daily_prediction(self, update: Update, context: Optional[ContextTypes.DEFAULT_TYPE]):
-        """Handle daily prediction command."""
+        """Provide daily prediction using advanced analytics."""
         if not update.effective_user or not update.message:
             return
-            
         user = self._get_user_sync(str(update.effective_user.id))
         if not user:
             await update.message.reply_text("❌ Please register first using /register")
             return
-        
         try:
-            daily_msg = f"""🌟 **Daily Cosmic Guidance for {user.name}**
+            from src.astrology.advanced_analytics import advanced_analytics
+            user_data = {
+                'name': user.name,
+                'birth_date': user.birth_date,
+                'birth_time': user.birth_time,
+                'birth_place': user.birth_place
+            }
+            prediction = advanced_analytics.get_advanced_prediction(user_data, 'daily')
+            if 'error' in prediction:
+                # Fallback to basic prediction
+                basic_prediction = f"""📅 **Daily Prediction for {user.name}**
 
-**📅 Today's Energy:**
-• **Morning:** Perfect for new beginnings and important decisions
-• **Afternoon:** Focus on creative activities and learning
-• **Evening:** Family time and relaxation
-• **Night:** Reflection and planning for tomorrow
+**Today's Cosmic Energy:**
+• Focus on personal growth and spiritual development
+• Family harmony and emotional well-being
+• Health and wellness practices
+• Career and life purpose alignment
 
-**💫 Today's Focus:**
-• **Personal growth:** Time for self-improvement
-• **Family harmony:** Strengthen family bonds
-• **Health:** Focus on wellness and vitality
-• **Spiritual:** Connect with higher consciousness
-
-**🎯 Today's Opportunities:**
-• **Morning meditation:** Start day with intention
-• **Family bonding:** Quality time with loved ones
-• **Health activities:** Exercise and healthy eating
-• **Spiritual practice:** Prayer and meditation
-
-**💎 Today's Remedies:**
-• **Morning:** Light a diya for positive energy
-• **Afternoon:** Drink water from copper vessel
-• **Evening:** Family prayer and gratitude
-• **Night:** Reflect on the day's blessings
-
-Have a wonderful day filled with cosmic blessings! ✨"""
-            
-            await update.message.reply_text(daily_msg, parse_mode='Markdown')
-            
+**🌟 Today's Guidance:** Trust your intuition and follow your heart's calling! ✨"""
+                await update.message.reply_text(basic_prediction, parse_mode='Markdown')
+            else:
+                await update.message.reply_text(prediction['prediction'], parse_mode='Markdown')
         except Exception as e:
             logger.error(f"Daily prediction error: {e}")
             await update.message.reply_text("❌ Error generating daily prediction. Please try again.")
@@ -930,10 +923,16 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 • `/help` - Show this help message
 
 **📅 Prediction Commands:**
-• `/daily` - Today's cosmic guidance
+• `/daily` - Today's cosmic guidance (with advanced analytics)
 • `/weekly` - This week's forecast
 • `/monthly` - Monthly overview
 • `/yearly` - Annual predictions
+
+**🔮 Advanced Analytics:**
+• `/analytics` - Comprehensive astrology analysis
+• `/dasha` - Current dasha period information
+• `/transits` - Current planetary transits
+• `/yogas` - Active yogas in your chart
 
 **💫 Personal Guidance:**
 • `/personal` - Personal life guidance
@@ -946,6 +945,10 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 **👨‍👩‍👧‍👦 Family Commands:**
 • `/family_recommendations` - Family peace, harmony, health, wealth & happiness
 • `/family_members` - View registered family members
+
+**🤖 AI-Powered Chat:**
+• `/ai` - Advanced AI chat (requires Ollama)
+• `/ai model:prompt` - Use specific LLM model
 
 **🔮 Consultation Commands:**
 • `/ask [question]` - Ask specific questions
@@ -1301,6 +1304,133 @@ Use any command or just chat naturally! ✨"""
             await update.message.reply_text(response)
         except Exception as e:
             await update.message.reply_text(f"❌ Error communicating with Ollama: {e}")
+
+    async def analytics_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show comprehensive astrology analytics."""
+        if not update.effective_user or not update.message:
+            return
+        user = self._get_user_sync(str(update.effective_user.id))
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        try:
+            from src.astrology.advanced_analytics import advanced_analytics
+            user_data = {
+                'name': user.name,
+                'birth_date': user.birth_date,
+                'birth_time': user.birth_time,
+                'birth_place': user.birth_place
+            }
+            analytics = advanced_analytics.get_advanced_prediction(user_data, 'comprehensive')
+            if 'error' in analytics:
+                await update.message.reply_text("❌ Error generating analytics. Please try again.")
+                return
+            await update.message.reply_text(analytics['prediction'], parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Analytics error: {e}")
+            await update.message.reply_text("❌ Error showing analytics. Please try again.")
+
+    async def dasha_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show current dasha information."""
+        if not update.effective_user or not update.message:
+            return
+        user = self._get_user_sync(str(update.effective_user.id))
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        try:
+            from src.astrology.advanced_analytics import advanced_analytics
+            dasha_info = advanced_analytics.calculate_dasha(user.birth_date, user.birth_time)
+            if 'error' in dasha_info:
+                await update.message.reply_text("❌ Error calculating dasha. Please try again.")
+                return
+            message = f"""🕉️ **Dasha Analysis for {user.name}**
+
+**Current Dasha Lord:** {dasha_info.get('current_dasha', 'Unknown')}
+**Years Remaining:** {dasha_info.get('years_remaining', 0):.1f} years
+**Dasha Period:** {dasha_info.get('dasha_start', 0):.1f} - {dasha_info.get('dasha_end', 0):.1f} years
+
+**💫 Dasha Guidance:**
+Based on your current dasha period, focus on:
+• Personal growth and spiritual development
+• Family harmony and relationships
+• Career advancement and life purpose
+• Health and wellness practices
+
+**🌟 Cosmic Blessings:** Your dasha period brings opportunities for growth and success! ✨"""
+            await update.message.reply_text(message, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Dasha error: {e}")
+            await update.message.reply_text("❌ Error showing dasha. Please try again.")
+
+    async def transits_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show current planetary transits."""
+        if not update.effective_user or not update.message:
+            return
+        user = self._get_user_sync(str(update.effective_user.id))
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        try:
+            from src.astrology.advanced_analytics import advanced_analytics
+            transits = advanced_analytics.calculate_transits(user.birth_date, user.birth_time, user.birth_place)
+            if 'error' in transits:
+                await update.message.reply_text("❌ Error calculating transits. Please try again.")
+                return
+            message = f"""🌞 **Current Transits for {user.name}**
+
+**Planetary Positions:**
+"""
+            for planet, data in transits.items():
+                if isinstance(data, dict) and 'longitude' in data:
+                    message += f"• **{planet}:** {data['longitude']:.1f}°\n"
+            message += f"""
+
+**💫 Transit Guidance:**
+Current planetary transits influence your:
+• Personal energy and mood
+• Relationships and communication
+• Career and life decisions
+• Health and wellness
+
+**🌟 Cosmic Energy:** Use these transits for positive growth and harmony! ✨"""
+            await update.message.reply_text(message, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Transits error: {e}")
+            await update.message.reply_text("❌ Error showing transits. Please try again.")
+
+    async def yogas_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show active yogas in birth chart."""
+        if not update.effective_user or not update.message:
+            return
+        user = self._get_user_sync(str(update.effective_user.id))
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        try:
+            from src.astrology.advanced_analytics import advanced_analytics
+            transits = advanced_analytics.calculate_transits(user.birth_date, user.birth_time, user.birth_place)
+            yogas = advanced_analytics.detect_yogas(transits)
+            if not yogas:
+                message = f"""✨ **Yoga Analysis for {user.name}**
+
+**Active Yogas:** No major yogas currently active
+
+**💫 Guidance:** Focus on your natural talents and strengths for personal growth and family harmony! ✨"""
+            else:
+                message = f"""✨ **Yoga Analysis for {user.name}**
+
+**Active Yogas:**
+"""
+                for yoga in yogas:
+                    message += f"• **{yoga['name']}** ({yoga['strength']}): {yoga['description']}\n"
+                message += f"""
+
+**💫 Cosmic Blessings:** These yogas enhance your natural abilities and bring positive energy! ✨"""
+            await update.message.reply_text(message, parse_mode='Markdown')
+        except Exception as e:
+            logger.error(f"Yogas error: {e}")
+            await update.message.reply_text("❌ Error showing yogas. Please try again.")
 
     def run_sync(self):
         """Run the bot synchronously."""
