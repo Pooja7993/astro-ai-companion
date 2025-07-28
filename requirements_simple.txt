@@ -25,8 +25,11 @@ httpx>=0.25.2
 pandas>=2.0.0
 numpy>=1.24.0
 
+# Chart Visualization
+matplotlib>=3.7.0
+
 # Astrology & Calculations
-ephem>=4.1.4
+ephem>=4.1.4 # Changed from swisseph and flatlib
 
 # YAML Configuration
 pyyaml>=6.0.1

@@ -71,6 +71,11 @@ class SimpleAstroBot:
         self.application.add_handler(CommandHandler('family_recommendations', self.family_recommendations_command))
         self.application.add_handler(CommandHandler('ai', self.ai_command))
         
+        # Voice and chart commands
+        self.application.add_handler(CommandHandler('chart', self.chart_command))
+        self.application.add_handler(CommandHandler('prediction_image', self.prediction_image_command))
+        self.application.add_handler(CommandHandler('voice_prediction', self.voice_prediction_command))
+        
         # Optional enhancements
         self.application.add_handler(CommandHandler('progress', self.show_progress))
         self.application.add_handler(CommandHandler('goals', self.show_goals))
@@ -933,6 +938,11 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 • `/dasha` - Current dasha period information
 • `/transits` - Current planetary transits
 • `/yogas` - Active yogas in your chart
+
+**🖼️ Voice & Chart Features:**
+• `/chart` - Generate your birth chart image
+• `/prediction_image` - Get prediction as beautiful image
+• `/voice_prediction` - Voice prediction (coming soon)
 
 **💫 Personal Guidance:**
 • `/personal` - Personal life guidance
