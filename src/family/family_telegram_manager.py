@@ -43,11 +43,12 @@ class FamilyTelegramManager:
                 # Create user profile for family member
                 family_user = User(
                     telegram_id=telegram_id,
+                    chat_id=telegram_id,
                     name=family_member.name,
                     birth_date=family_member.birth_date or "1990-01-01",
                     birth_time=family_member.birth_time or "12:00",
                     birth_place=family_member.birth_place or "Mumbai, India",
-                    language=language,
+                    language_preference=language,
                     daily_reports_enabled=True,
                     realtime_guidance_enabled=True
                 )

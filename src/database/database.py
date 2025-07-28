@@ -226,7 +226,7 @@ class DatabaseManager:
                         birth_date=row[2],
                         birth_time=row[3],
                         birth_place=row[4],
-                        language=row[5],
+                        language_preference=row[5],
                         daily_reports_enabled=bool(row[6]),
                         realtime_guidance_enabled=bool(row[7])
                     )

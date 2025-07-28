@@ -275,11 +275,12 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
         # For now, return a mock user
         return User(
             telegram_id=telegram_id,
+            chat_id=telegram_id,  # Added chat_id
             name="Family Member",
             birth_date="1990-01-01",
             birth_time="12:00",
             birth_place="Mumbai, India",
-            language='en',
+            language_preference='en',  # Fixed field name
             daily_reports_enabled=True,
             realtime_guidance_enabled=True
         )
