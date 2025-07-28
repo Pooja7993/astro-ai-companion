@@ -1098,28 +1098,22 @@ Use these timings for best results! ✨"""
     def run_sync(self):
         """Run the bot synchronously."""
         try:
-            # Initialize the bot
-            self.application.initialize()
-            
-            # Start the bot
-            self.application.start()
-            
-            # Run the bot
-            self.application.run_polling()
-            
+            # Use the built-in run_polling method (sync version)
+            self.application.run_polling(allowed_updates=Update.ALL_TYPES)
         except Exception as e:
             logger.error(f"Error running bot: {e}")
             raise
 
     async def run(self):
         """Run the bot asynchronously."""
-        await self.application.initialize()
-        await self.application.start()
-        await self.application.updater.start_polling()
-        
         try:
-            await self.application.updater.idle()
+            # Use the built-in run_polling method (async version)
+            await self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+        except Exception as e:
+            logger.error(f"Error running bot: {e}")
+            raise
         finally:
+            # Cleanup
             await self.application.stop()
             await self.application.shutdown()
 
