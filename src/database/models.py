@@ -12,11 +12,12 @@ from datetime import datetime
 class User:
     """User model for Astro AI Companion."""
     telegram_id: str
+    chat_id: str  # Added for direct messaging
     name: str
     birth_date: str
     birth_time: str
     birth_place: str
-    language: str = 'en'
+    language_preference: str = 'en'  # Updated field name
     daily_reports_enabled: bool = True
     realtime_guidance_enabled: bool = True
 

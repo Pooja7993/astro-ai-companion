@@ -43,8 +43,11 @@ class SimpleAstroBot:
         # Basic commands
         self.application.add_handler(CommandHandler('start', self.start_command))
         self.application.add_handler(CommandHandler('register', self.register_command))
+        self.application.add_handler(CommandHandler('edit_profile', self.edit_profile_command))
         self.application.add_handler(CommandHandler('help', self.help_command))
         self.application.add_handler(CommandHandler('profile', self.show_profile))
+        self.application.add_handler(CommandHandler('commands', self.commands_list))
+        self.application.add_handler(CommandHandler('family_members', self.family_members_command))
         
         # Prediction commands
         self.application.add_handler(CommandHandler('daily', self.daily_prediction))
@@ -163,23 +166,35 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
         """Handle user registration with birth details."""
         try:
             parts = message_text.split('|')
-            if len(parts) != 4:
+            if len(parts) < 4 or len(parts) > 5:
                 await update.message.reply_text(
                     "❌ Please provide all details in the correct format:\n"
-                    "**Name|Date of Birth|Time of Birth|Place of Birth**"
+                    "**Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
+                    "Example:\n"
+                    "`John Doe|1990-01-15|14:30|Mumbai, India|en`\n\n"
+                    "Language: en (English) or mr (Marathi)"
                 )
                 return
             
-            name, dob, tob, place = [part.strip() for part in parts]
+            name, dob, tob, place = [part.strip() for part in parts[:4]]
+            language = parts[4].strip() if len(parts) == 5 else 'en'
+            
+            # Validate language
+            if language not in ['en', 'mr']:
+                language = 'en'
+            
+            # Get chat_id for direct messaging
+            chat_id = str(update.effective_user.id)
             
             # Create user profile
             user = User(
                 telegram_id=user_id,
+                chat_id=chat_id,
                 name=name,
                 birth_date=dob,
                 birth_time=tob,
                 birth_place=place,
-                language='en',
+                language_preference=language,
                 daily_reports_enabled=True,
                 realtime_guidance_enabled=True
             )
@@ -189,7 +204,13 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
             
             await update.message.reply_text(
                 f"✅ **Welcome to your personal astrology companion, {name}!**\n\n"
-                "Your profile has been created successfully. I can now provide you with:\n\n"
+                f"**Profile Created Successfully:**\n"
+                f"• **Name:** {name}\n"
+                f"• **Birth Date:** {dob}\n"
+                f"• **Birth Time:** {tob}\n"
+                f"• **Birth Place:** {place}\n"
+                f"• **Language:** {language.upper()}\n\n"
+                "I can now provide you with:\n\n"
                 "• **Personal daily guidance** based on your birth chart\n"
                 "• **Family insights** and relationship analysis\n"
                 "• **Health and wellness** cosmic guidance\n"
@@ -198,7 +219,8 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
                 "• `/daily` - Today's guidance\n"
                 "• `/family` - Family insights\n"
                 "• `/health` - Wellness guidance\n"
-                "• `/personal` - Personal life guidance\n\n"
+                "• `/personal` - Personal life guidance\n"
+                "• `/edit_profile` - Update your profile\n\n"
                 "What would you like to know about your cosmic journey? ✨",
                 parse_mode='Markdown'
             )
@@ -755,7 +777,7 @@ May this year bring you abundant blessings, success, and fulfillment! ✨"""
 • **Birth Date:** {user.birth_date}
 • **Birth Time:** {user.birth_time}
 • **Birth Place:** {user.birth_place}
-• **Language:** {user.language}
+• **Language:** {user.language_preference}
 
 **⚙️ Settings:**
 • **Daily Reports:** {'✅ Enabled' if user.daily_reports_enabled else '❌ Disabled'}
@@ -866,8 +888,10 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 **🎯 Basic Commands:**
 • `/start` - Welcome message and introduction
 • `/register` - Create your personal profile
-• `/help` - Show this help message
+• `/edit_profile` - Update your profile details
 • `/profile` - View your personal details
+• `/commands` - Complete list of all commands
+• `/help` - Show this help message
 
 **📅 Prediction Commands:**
 • `/daily` - Today's cosmic guidance
@@ -883,10 +907,13 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 • `/spiritual` - Spiritual growth guidance
 • `/life_purpose` - Life purpose and career guidance
 
+**👨‍👩‍👧‍👦 Family Commands:**
+• `/family_recommendations` - Family peace, harmony, health, wealth & happiness
+• `/family_members` - View registered family members
+
 **🔮 Consultation Commands:**
 • `/ask [question]` - Ask specific questions
 • `/remedies` - Personalized remedies
-• `/family_recommendations` - Family peace, harmony, health, wealth & happiness
 
 **📊 Optional Enhancements:**
 • `/progress` - Track your progress and achievements
@@ -1098,6 +1125,129 @@ Use these timings for best results! ✨"""
         except Exception as e:
             logger.error(f"Rituals error: {e}")
             await update.message.reply_text("❌ Error showing rituals. Please try again.")
+
+    async def edit_profile_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle profile editing."""
+        if not update.effective_user or not update.message:
+            return
+        
+        user_id = str(update.effective_user.id)
+        user_name = update.effective_user.first_name or "User"
+        
+        # Check if user exists
+        existing_user = self._get_user_sync(user_id)
+        if not existing_user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        
+        # Guide user through profile editing
+        await update.message.reply_text(
+            f"✏️ **Edit Profile for {user_name}**\n\n"
+            "Please provide your updated birth details in this format:\n"
+            "**Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
+            "Example:\n"
+            "`John Doe|1990-01-15|14:30|Mumbai, India|en`\n\n"
+            "**Language options:** en (English) or mr (Marathi)\n\n"
+            "This will update your profile and preferences."
+        )
+
+    async def commands_list(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show complete list of available commands."""
+        commands_msg = """📋 **Complete Command List**
+
+**👤 Profile Commands:**
+• `/start` - Welcome message and introduction
+• `/register` - Create your profile (first time only)
+• `/edit_profile` - Update your profile details
+• `/profile` - View your current profile
+• `/commands` - Show this complete command list
+
+**🔮 Prediction Commands:**
+• `/daily` - Get your daily prediction
+• `/weekly` - Get your weekly forecast
+• `/monthly` - Get your monthly insights
+• `/yearly` - Get your yearly predictions
+
+**🎯 Personal Guidance:**
+• `/personal` - Personal life guidance
+• `/health` - Health and wellness guidance
+• `/relationships` - Relationship advice
+• `/spiritual` - Spiritual growth guidance
+• `/life_purpose` - Life purpose discovery
+
+**👨‍👩‍👧‍👦 Family Commands:**
+• `/family` - Family relationship guidance
+• `/family_recommendations` - Family recommendations
+• `/family_members` - View registered family members
+
+**🛠️ Utility Commands:**
+• `/remedies` - Get astrological remedies
+• `/ask` - Ask me anything
+• `/help` - Quick help guide
+
+**✨ Optional Enhancements:**
+• `/progress` - Track your progress
+• `/goals` - View your goals
+• `/set_goal` - Set new goals
+• `/timing` - Best timing for activities
+• `/rituals` - Custom family rituals
+
+**💬 Natural Chat:**
+Just type anything naturally - I'll respond with personalized guidance!
+
+**🌐 Language Support:**
+• English (en) - Default
+• Marathi (mr) - Set in profile
+
+Use any command or just chat naturally! ✨"""
+        
+        await update.message.reply_text(commands_msg, parse_mode='Markdown')
+
+    async def family_members_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show registered family members."""
+        if not update.effective_user or not update.message:
+            return
+        
+        user_id = str(update.effective_user.id)
+        user = self._get_user_sync(user_id)
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        
+        try:
+            # Get family members from database
+            from src.database.database import DatabaseManager
+            db = DatabaseManager()
+            family_members = db.get_family_members()
+            
+            if not family_members:
+                await update.message.reply_text(
+                    "👨‍👩‍👧‍👦 **Family Members**\n\n"
+                    "No family members registered yet.\n\n"
+                    "To add family members, use the registration process.\n"
+                    "Each family member should register individually."
+                )
+                return
+            
+            # Format family members message
+            message = "👨‍👩‍👧‍👦 **Registered Family Members**\n\n"
+            
+            for i, member in enumerate(family_members, 1):
+                message += f"""**{i}. {member.name}**
+• **Relationship:** {member.relationship}
+• **Birth Date:** {member.birth_date or 'Not set'}
+• **Birth Time:** {member.birth_time or 'Not set'}
+• **Birth Place:** {member.birth_place or 'Not set'}
+
+"""
+            
+            message += "Each family member can register individually for personalized guidance! ✨"
+            
+            await update.message.reply_text(message, parse_mode='Markdown')
+            
+        except Exception as e:
+            logger.error(f"Family members error: {e}")
+            await update.message.reply_text("❌ Error showing family members. Please try again.")
 
     def run_sync(self):
         """Run the bot synchronously."""
