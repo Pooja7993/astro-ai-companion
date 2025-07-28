@@ -89,6 +89,9 @@ class SimpleAstroBot:
         self.application.add_handler(CommandHandler('transits', self.transits_command))
         self.application.add_handler(CommandHandler('yogas', self.yogas_command))
 
+        # Adaptive learning commands
+        self.application.add_handler(CommandHandler('adaptive', self.adaptive_recommendation_command))
+
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /start command."""
         welcome_msg = """🌟 **Welcome to Your Personal Astro AI Companion!**
@@ -618,7 +621,7 @@ Want more specific guidance? Ask me: "What's my true calling?" or "How can I ful
             await update.message.reply_text("❌ Error generating life purpose guidance. Please try again.")
 
     async def daily_prediction(self, update: Update, context: Optional[ContextTypes.DEFAULT_TYPE]):
-        """Provide daily prediction using advanced analytics."""
+        """Provide daily prediction using advanced analytics and adaptive recommendations."""
         if not update.effective_user or not update.message:
             return
         user = self._get_user_sync(str(update.effective_user.id))
@@ -627,30 +630,112 @@ Want more specific guidance? Ask me: "What's my true calling?" or "How can I ful
             return
         try:
             from src.astrology.advanced_analytics import advanced_analytics
+            from src.utils.feedback_learning import feedback_learning
+            
             user_data = {
                 'name': user.name,
                 'birth_date': user.birth_date,
                 'birth_time': user.birth_time,
                 'birth_place': user.birth_place
             }
+            
+            # Get adaptive recommendation
+            adaptive_prediction = feedback_learning.generate_adaptive_recommendation(
+                str(update.effective_user.id), 'daily', user.name
+            )
+            
+            # Try advanced analytics first
             prediction = advanced_analytics.get_advanced_prediction(user_data, 'daily')
             if 'error' in prediction:
-                # Fallback to basic prediction
-                basic_prediction = f"""📅 **Daily Prediction for {user.name}**
-
-**Today's Cosmic Energy:**
-• Focus on personal growth and spiritual development
-• Family harmony and emotional well-being
-• Health and wellness practices
-• Career and life purpose alignment
-
-**🌟 Today's Guidance:** Trust your intuition and follow your heart's calling! ✨"""
-                await update.message.reply_text(basic_prediction, parse_mode='Markdown')
+                # Use adaptive recommendation as fallback
+                await update.message.reply_text(adaptive_prediction, parse_mode='Markdown')
             else:
-                await update.message.reply_text(prediction['prediction'], parse_mode='Markdown')
+                # Combine advanced analytics with adaptive elements
+                combined_prediction = prediction['prediction'] + "\n\n" + adaptive_prediction
+                await update.message.reply_text(combined_prediction, parse_mode='Markdown')
+            
+            # Add feedback prompt
+            feedback_prompt = feedback_learning.create_feedback_prompt('daily')
+            await update.message.reply_text(feedback_prompt, parse_mode='Markdown')
+            
         except Exception as e:
             logger.error(f"Daily prediction error: {e}")
             await update.message.reply_text("❌ Error generating daily prediction. Please try again.")
+
+    async def handle_feedback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle user feedback reactions."""
+        if not update.effective_user or not update.message:
+            return
+        
+        user_id = str(update.effective_user.id)
+        message_text = update.message.text.lower()
+        
+        # Determine feedback score based on message
+        if any(word in message_text for word in ['👍', 'helpful', 'good', 'great', 'love']):
+            feedback_score = 5
+        elif any(word in message_text for word in ['👎', 'not helpful', 'bad', 'useless']):
+            feedback_score = 1
+        else:
+            feedback_score = 3  # Neutral
+        
+        try:
+            from src.utils.feedback_learning import feedback_learning
+            
+            # Store feedback
+            success = feedback_learning.collect_feedback(
+                user_id, 'general', feedback_score, update.message.text
+            )
+            
+            if success:
+                if feedback_score >= 4:
+                    await update.message.reply_text("🌟 Thank you for your positive feedback! We'll continue to provide helpful guidance for you and your family! ✨")
+                elif feedback_score <= 2:
+                    await update.message.reply_text("🙏 Thank you for your feedback! We'll work to improve and provide better guidance for you! ✨")
+                else:
+                    await update.message.reply_text("💫 Thank you for your feedback! We're here to support your cosmic journey! ✨")
+            else:
+                await update.message.reply_text("❌ Error saving feedback. Please try again.")
+                
+        except Exception as e:
+            logger.error(f"Feedback handling error: {e}")
+            await update.message.reply_text("❌ Error processing feedback. Please try again.")
+
+    async def adaptive_recommendation_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Get personalized adaptive recommendation."""
+        if not update.effective_user or not update.message:
+            return
+        user = self._get_user_sync(str(update.effective_user.id))
+        if not user:
+            await update.message.reply_text("❌ Please register first using /register")
+            return
+        try:
+            from src.utils.feedback_learning import feedback_learning
+            
+            # Get user preferences
+            preferences = feedback_learning.get_user_preferences(str(update.effective_user.id))
+            
+            # Generate adaptive recommendation
+            recommendation = feedback_learning.generate_adaptive_recommendation(
+                str(update.effective_user.id), 'personal', user.name
+            )
+            
+            # Add preferences summary
+            preferences_summary = f"""
+
+**📊 Your Learning Profile:**
+• **Favorite Topics:** {', '.join(preferences.get('favorite_categories', ['Daily', 'Family']))}
+• **Preferred Style:** {preferences.get('preferred_style', 'Balanced').title()}
+• **Feedback Score:** {preferences.get('feedback_score', 3):.1f}/5.0
+• **Total Feedback:** {preferences.get('total_feedback', 0)} responses
+
+**💫 Your personalized guidance is based on your feedback and preferences!** ✨"""
+            
+            full_recommendation = recommendation + preferences_summary
+            await update.message.reply_text(full_recommendation, parse_mode='Markdown')
+            
+        except Exception as e:
+            logger.error(f"Adaptive recommendation error: {e}")
+            await update.message.reply_text("❌ Error generating adaptive recommendation. Please try again.")
 
     async def weekly_prediction(self, update: Update, context: Optional[ContextTypes.DEFAULT_TYPE]):
         """Handle weekly prediction command."""
@@ -928,7 +1013,7 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 • `/help` - Show this help message
 
 **📅 Prediction Commands:**
-• `/daily` - Today's cosmic guidance (with advanced analytics)
+• `/daily` - Today's cosmic guidance (with advanced analytics & adaptive learning)
 • `/weekly` - This week's forecast
 • `/monthly` - Monthly overview
 • `/yearly` - Annual predictions
@@ -944,6 +1029,11 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 • `/prediction_image` - Get prediction as beautiful image
 • `/voice_prediction` - Voice prediction (coming soon)
 
+**🤖 AI & Learning:**
+• `/ai` - Advanced AI chat (requires Ollama)
+• `/ai model:prompt` - Use specific LLM model
+• `/adaptive` - Get personalized adaptive recommendations
+
 **💫 Personal Guidance:**
 • `/personal` - Personal life guidance
 • `/family` - Family and relationship insights
@@ -955,10 +1045,6 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 **👨‍👩‍👧‍👦 Family Commands:**
 • `/family_recommendations` - Family peace, harmony, health, wealth & happiness
 • `/family_members` - View registered family members
-
-**🤖 AI-Powered Chat:**
-• `/ai` - Advanced AI chat (requires Ollama)
-• `/ai model:prompt` - Use specific LLM model
 
 **🔮 Consultation Commands:**
 • `/ask [question]` - Ask specific questions
@@ -989,6 +1075,9 @@ You can also chat with me naturally! Just type your questions or thoughts, and I
 
 **🌟 Your Personal Astrology Guide:**
 I'm designed specifically for you and your family, providing personalized cosmic guidance for your personal growth and family harmony.
+
+**💡 Feedback System:**
+Rate predictions with 👍 or 👎 to help personalize your experience!
 
 Need help with anything specific? Just ask! ✨"""
 
