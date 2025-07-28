@@ -30,8 +30,12 @@ class SimpleAstroBot:
         if not self.config.has_telegram_token():
             raise ValueError("TELEGRAM_BOT_TOKEN is required but not found in environment variables")
         
-        # Initialize bot
+        # Initialize bot with conflict prevention
         self.application = Application.builder().token(self.config.telegram.telegram_bot_token.get_secret_value()).build()
+        
+        # Add conflict prevention settings
+        self.application.bot.delete_webhook(drop_pending_updates=True)
+        
         self._register_handlers()
     
     def _register_handlers(self):
@@ -1098,8 +1102,12 @@ Use these timings for best results! ✨"""
     def run_sync(self):
         """Run the bot synchronously."""
         try:
-            # Use the built-in run_polling method (sync version)
-            self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+            # Use the built-in run_polling method (sync version) with conflict prevention
+            self.application.run_polling(
+                allowed_updates=Update.ALL_TYPES,
+                drop_pending_updates=True,
+                close_loop=False
+            )
         except Exception as e:
             logger.error(f"Error running bot: {e}")
             raise
@@ -1107,8 +1115,12 @@ Use these timings for best results! ✨"""
     async def run(self):
         """Run the bot asynchronously."""
         try:
-            # Use the built-in run_polling method (async version)
-            await self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+            # Use the built-in run_polling method (async version) with conflict prevention
+            await self.application.run_polling(
+                allowed_updates=Update.ALL_TYPES,
+                drop_pending_updates=True,
+                close_loop=False
+            )
         except Exception as e:
             logger.error(f"Error running bot: {e}")
             raise
