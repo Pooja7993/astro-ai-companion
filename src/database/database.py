@@ -14,7 +14,7 @@ from loguru import logger
 from src.database.models import User, FamilyMember
 from src.utils.config_simple import get_config
 
-logger = get_logger(__name__)
+# logger is already imported from loguru
 
 
 class DatabaseManager:

@@ -10,14 +10,18 @@ from typing import Dict, List, Any, Optional
 import yaml
 from pathlib import Path
 
-from src.utils.config_simple import Config
+from src.utils.config_simple import get_config
 
 
 class SimpleChartAnalyzer:
     """Simple chart analyzer using Ephem."""
     
     def __init__(self):
-        self.config = Config()
+        try:
+            self.config = get_config()
+        except Exception:
+            # Use default config if environment variables are missing
+            self.config = None
         
         self.city_coordinates = self._load_city_coordinates()
         

@@ -18,18 +18,20 @@ from src.database.models import User
 from src.utils.config_simple import get_config
 from src.family.family_recommendations import family_recommendations
 
-logger = get_logger(__name__)
-
 
 class SimpleAstroBot:
     """Simple Astro AI Companion Bot for personal family use."""
     
     def __init__(self):
         self.config = get_config()
-        self.chart_analyzer = ChartAnalyzer()
+        self.chart_analyzer = chart_analyzer
+        
+        # Check if telegram token is available
+        if not self.config.has_telegram_token():
+            raise ValueError("TELEGRAM_BOT_TOKEN is required but not found in environment variables")
         
         # Initialize bot
-        self.application = Application.builder().token(self.config.telegram_bot_token).build()
+        self.application = Application.builder().token(self.config.telegram.telegram_bot_token.get_secret_value()).build()
         self._register_handlers()
     
     def _register_handlers(self):

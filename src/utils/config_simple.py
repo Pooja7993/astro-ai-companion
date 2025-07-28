@@ -48,7 +48,7 @@ class AstrologyConfig(BaseSettings):
 class TelegramConfig(BaseSettings):
     """Telegram bot configuration."""
     
-    telegram_bot_token: SecretStr = Field(..., description="Telegram bot token")
+    telegram_bot_token: Optional[SecretStr] = Field(default=None, description="Telegram bot token")
     telegram_chat_id: Optional[str] = Field(default=None, description="Default Telegram chat ID")
     
     # Bot settings
@@ -140,6 +140,10 @@ class Config(BaseSettings):
     def get_log_level(self) -> int:
         """Get logging level as integer."""
         return getattr(logging, self.logging.log_level.upper(), logging.INFO)
+    
+    def has_telegram_token(self) -> bool:
+        """Check if telegram token is available."""
+        return self.telegram.telegram_bot_token is not None
 
 # Global configuration instance
 _config: Optional[Config] = None
