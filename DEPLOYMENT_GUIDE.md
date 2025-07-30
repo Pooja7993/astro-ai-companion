@@ -2,7 +2,9 @@
 
 ## 📋 **Table of Contents**
 1. [Local Development Setup](#local-development-setup)
-2. [Ollama AI Setup](#ollama-ai-setup)
+2. [AI Chat Setup](#ai-chat-setup)
+   - [OpenRouter Setup](#openrouter-setup-recommended)
+   - [Ollama Setup](#ollama-setup-alternative)
 3. [Telegram Bot Setup](#telegram-bot-setup)
 4. [Render Deployment](#render-deployment)
 5. [Troubleshooting](#troubleshooting)
@@ -37,8 +39,16 @@ pip install -r requirements_simple.txt
 ### **Step 4: Environment Variables**
 Create `.env` file:
 ```env
+# Required for Telegram bot
 telegram_bot_token=your_bot_token_here
 telegram_chat_id=5929651379
+
+# For OpenRouter AI chat (recommended)
+LLM_PROVIDER=openrouter
+LLM_OPENROUTER_API_KEY=your_api_key_here
+
+# For Ollama (alternative, local LLM)
+# LLM_PROVIDER=ollama
 ```
 
 ### **Step 5: Test Locally**
@@ -57,7 +67,30 @@ python run_simple.py
 
 ---
 
-## 🤖 **Ollama AI Setup (Optional)**
+## 🤖 **AI Chat Setup**
+
+## **OpenRouter Setup (Recommended)**
+
+### **Step 1: Create OpenRouter Account**
+- Visit [openrouter.ai](https://openrouter.ai) and create an account
+- Navigate to the API Keys section and generate a new API key
+
+### **Step 2: Configure Environment Variables**
+Add to your `.env` file:
+```env
+LLM_PROVIDER=openrouter
+LLM_OPENROUTER_API_KEY=your_api_key_here
+```
+
+### **Step 3: Test AI Chat in Bot**
+In your Telegram bot:
+```
+/ai What's my astrological forecast for today?
+/ai gpt-3.5:Tell me about my compatibility with Taurus
+/ai claude:What does my birth chart indicate about my career?
+```
+
+## **Ollama Setup (Alternative)**
 
 ### **Step 1: Install Ollama**
 - **Windows:** Download from [ollama.ai](https://ollama.ai)
@@ -79,13 +112,19 @@ ollama pull phi3
 ollama pull gemma
 ```
 
-### **Step 4: Test Ollama**
+### **Step 4: Configure Environment Variables**
+Add to your `.env` file:
+```env
+LLM_PROVIDER=ollama
+```
+
+### **Step 5: Test Ollama**
 ```bash
 # Test if Ollama is working
 ollama run llama3 "Hello, how are you?"
 ```
 
-### **Step 5: Test AI Chat in Bot**
+### **Step 6: Test AI Chat in Bot**
 In your Telegram bot:
 ```
 /ai What is my astrological forecast today?
@@ -147,9 +186,19 @@ git push origin main
 ### **Step 5: Environment Variables**
 In Render dashboard, add:
 ```
+# Required for Telegram bot
 telegram_bot_token=your_bot_token_here
 telegram_chat_id=your_chat_id_here
+
+# For OpenRouter AI chat (recommended for cloud deployment)
+LLM_PROVIDER=openrouter
+LLM_OPENROUTER_API_KEY=your_api_key_here
+
+# Set this to true for Render deployment
+IS_ON_RENDER=true
 ```
+
+**Note:** For cloud deployments, OpenRouter is strongly recommended over Ollama since Ollama requires local installation.
 
 ### **Step 6: Deploy**
 1. Click **"Create Web Service"**
@@ -171,13 +220,23 @@ telegram_chat_id=your_chat_id_here
 - Check Render logs for errors
 - Ensure bot is not blocked
 
-#### **2. Ollama Connection Error**
+#### **2. AI Chat Connection Error**
 **Symptoms:** `/ai` command fails
+
+**For OpenRouter:**
+**Solutions:**
+- Verify your OpenRouter API key is correct
+- Check if `LLM_PROVIDER` is set to `openrouter`
+- Ensure you have credits in your OpenRouter account
+- Check network connectivity to OpenRouter API
+
+**For Ollama:**
 **Solutions:**
 - Install Ollama: [ollama.ai](https://ollama.ai)
 - Start server: `ollama serve`
 - Download model: `ollama pull llama3`
 - Check firewall settings
+- Verify `LLM_PROVIDER` is set to `ollama`
 
 #### **3. Database Errors**
 **Symptoms:** Registration/profile errors
@@ -225,6 +284,8 @@ telegram_chat_id=your_chat_id
 
 # Database
 DB_DATABASE_URL=sqlite:///./data/astro_companion.db
+# For PostgreSQL (recommended for production)
+# DB_DATABASE_URL=postgresql://username:password@localhost:5432/astro_companion
 
 # Logging
 LOG_LOG_LEVEL=INFO
@@ -234,9 +295,24 @@ LOG_LOG_FILE=logs/simple_astro.log
 ASTRO_DEFAULT_LANGUAGE=en
 ASTRO_SUPPORTED_LANGUAGES=en,mr
 
+# LLM Configuration
+# OpenRouter (recommended)
+LLM_PROVIDER=openrouter
+LLM_OPENROUTER_API_KEY=your_api_key_here
+LLM_DEFAULT_MODEL=gpt-3.5-turbo  # Options: gpt-3.5-turbo, gpt-4, claude-3-haiku, claude-3-sonnet, etc.
+LLM_SYSTEM_PROMPT=You are an astrology expert assistant.
+LLM_MAX_TOKENS=1000
+LLM_TEMPERATURE=0.7
+
+# Ollama (alternative)
+# LLM_PROVIDER=ollama
+# LLM_OLLAMA_HOST=http://localhost:11434
+# LLM_DEFAULT_MODEL=llama3  # Options: llama3, mistral, codellama, phi3, gemma
+
 # Environment
 ENVIRONMENT=production
 DEBUG=false
+IS_ON_RENDER=false  # Set to true for Render deployment
 ```
 
 ### **Ollama Configuration**
@@ -332,4 +408,4 @@ Your Astro AI Companion is now ready to bring peace, harmony, health, wealth, an
 - Test commands one by one
 - Contact support if needed
 
-**Happy Astrology Journey!** ✨🌟 
+**Happy Astrology Journey!** ✨🌟

@@ -13,7 +13,10 @@ import logging
 class DatabaseConfig(BaseSettings):
     """Database configuration."""
     
-    database_url: str = Field(default="sqlite:///data/astro_companion.db", description="Database connection string")
+    database_url: str = Field(
+        default="sqlite:///data/astro_companion.db", 
+        description="Database connection string. For PostgreSQL on Render, this is set via DATABASE_URL environment variable."
+    )
     
     class Config:
         env_prefix = "DB_"
@@ -41,6 +44,20 @@ class AstrologyConfig(BaseSettings):
     prediction_cache_ttl: int = Field(default=3600, description="Prediction cache TTL in seconds")
     max_prediction_length: int = Field(default=1000, description="Maximum prediction text length")
     
+    # Astrology settings
+    chart_type: str = Field(default="tropical", description="Chart type (tropical or sidereal)")
+    house_system: str = Field(default="placidus", description="House system")
+    
+    # Interpretation settings
+    interpretation_depth: str = Field(default="detailed", description="Interpretation depth")
+    include_remedies: bool = Field(default=True, description="Include remedies in readings")
+    include_warnings: bool = Field(default=True, description="Include warnings in readings")
+    
+    # Advanced settings
+    include_aspects: bool = Field(default=True, description="Include aspects in readings")
+    include_transits: bool = Field(default=True, description="Include transits in readings")
+    include_progressions: bool = Field(default=False, description="Include progressions in readings")
+    
     class Config:
         env_prefix = "ASTRO_"
         case_sensitive = False
@@ -58,6 +75,15 @@ class TelegramConfig(BaseSettings):
     max_message_length: int = Field(default=4096, description="Maximum message length")
     enable_message_retry: bool = Field(default=True, description="Enable message retry on failure")
     message_retry_attempts: int = Field(default=3, description="Message retry attempts")
+    message_format: str = Field(default="markdown", description="Message format (markdown or html)")
+    include_emoji: bool = Field(default=True, description="Include emoji in messages")
+    
+    # Notification settings
+    daily_morning_time: str = Field(default="07:00", description="Daily morning notification time")
+    daily_evening_time: str = Field(default="19:00", description="Daily evening notification time")
+    
+    # Advanced settings
+    retry_delay: int = Field(default=5, description="Delay between retries in seconds")
     
     class Config:
         env_prefix = ""
@@ -77,9 +103,44 @@ class SchedulerConfig(BaseSettings):
     # Timezone
     default_timezone: str = Field(default="UTC", description="Default timezone")
     
+    # Job settings
+    daily_prediction_job: bool = Field(default=True, description="Enable daily prediction job")
+    weekly_summary_job: bool = Field(default=True, description="Enable weekly summary job")
+    
+    # Advanced settings
+    max_concurrent_jobs: int = Field(default=5, description="Maximum number of concurrent jobs")
+    job_timeout: int = Field(default=300, description="Job timeout in seconds")
+    
     class Config:
         env_prefix = "SCHEDULER_"
         case_sensitive = False
+
+class LLMConfig(BaseSettings):
+    """LLM configuration for AI chat capabilities."""
+    
+    # Provider settings
+    provider: str = Field(default="openrouter", description="LLM provider (openrouter or ollama)")
+    
+    # OpenRouter settings
+    openrouter_api_key: Optional[SecretStr] = Field(default=None, description="OpenRouter API key")
+    openrouter_default_model: str = Field(default="openai/gpt-3.5-turbo", description="Default OpenRouter model")
+    
+    # Ollama settings
+    ollama_host: str = Field(default="http://localhost:11434", description="Ollama host URL")
+    ollama_default_model: str = Field(default="llama3", description="Default Ollama model")
+    
+    # Common settings
+    system_prompt: str = Field(
+        default="You are a helpful astrology assistant providing guidance for peace, harmony, health, wealth, and happiness.",
+        description="Default system prompt for AI chat"
+    )
+    max_tokens: int = Field(default=1000, description="Maximum tokens for AI responses")
+    temperature: float = Field(default=0.7, description="Temperature for AI responses")
+    
+    class Config:
+        env_prefix = "LLM_"
+        case_sensitive = False
+
 
 class Config(BaseSettings):
     """Main application configuration for personal family use."""
@@ -102,6 +163,9 @@ class Config(BaseSettings):
     
     # Scheduler
     scheduler: SchedulerConfig = Field(default_factory=SchedulerConfig)
+    
+    # LLM
+    llm: LLMConfig = Field(default_factory=LLMConfig)
     
     # File paths
     data_dir: str = Field(default="./data", description="Data directory")
@@ -176,4 +240,9 @@ def get_telegram_config() -> TelegramConfig:
 
 def get_scheduler_config() -> SchedulerConfig:
     """Get scheduler configuration."""
-    return get_config().scheduler 
+    return get_config().scheduler
+
+
+def get_llm_config() -> LLMConfig:
+    """Get LLM configuration."""
+    return get_config().llm

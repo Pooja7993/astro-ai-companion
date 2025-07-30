@@ -27,8 +27,16 @@ class SimpleAstroBot:
     def __init__(self):
         self.config = get_config()
         self.chart_analyzer = chart_analyzer
-        self.pending_registration = {}  # user_id: True if waiting for registration details
-        self.pending_profile_update = {}  # user_id: True if waiting for profile edit details
+        
+        # Registration state tracking with detailed state information
+        self.pending_registration = {}  # user_id: {step: current_step, data: {collected data}}
+        self.pending_profile_update = {}  # user_id: {step: current_step, data: {collected data}}
+        
+        # Registration steps definition
+        self.registration_steps = [
+            "first_name", "middle_name", "last_name", 
+            "birth_date", "birth_time", "birth_place", "language"
+        ]
         
         # Check if telegram token is available
         if not self.config.has_telegram_token():
@@ -52,6 +60,7 @@ class SimpleAstroBot:
         self.application.add_handler(CommandHandler('profile', self.show_profile))
         self.application.add_handler(CommandHandler('commands', self.commands_list))
         self.application.add_handler(CommandHandler('family_members', self.family_members_command))
+        self.application.add_handler(CommandHandler('test_openrouter', self.test_openrouter_command))
         
         # Prediction commands
         self.application.add_handler(CommandHandler('daily', self.daily_prediction))
@@ -134,7 +143,7 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
         await update.message.reply_text(welcome_msg, parse_mode='Markdown')
     
     async def register_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle user registration."""
+        """Handle user registration with step-by-step approach."""
         if not update.effective_user or not update.message:
             return
         
@@ -146,11 +155,18 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
             await update.message.reply_text(
                 f"✅ You're already registered! Use /profile to see your details or /edit_profile to update.")
             return
-        self.pending_registration[user_id] = True
+        
+        # Initialize registration state with first step
+        self.pending_registration[user_id] = {
+            "step": "first_name",
+            "data": {}
+        }
+        
+        # Start the step-by-step registration process
         await update.message.reply_text(
-            "🌟 Let's create your profile!\n\nPlease enter your details in this format:\n"
-            "**First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
-            "Example:\nJohn|A.|Doe|1990-01-15|14:30|Mumbai, India|en\n\nLanguage: en (English) or mr (Marathi)")
+            "🌟 Welcome to the step-by-step profile creation!\n\n"
+            "Let's start with your first name.\n\n"
+            "*What is your first name?*", parse_mode='Markdown')
     
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle natural conversation messages."""
@@ -161,63 +177,301 @@ Ready to explore your cosmic journey? Start with `/register` or just chat with m
         message_text = update.message.text.strip()
         from src.database.database import DatabaseManager
         db = DatabaseManager()
-        if self.pending_registration.get(user_id):
-            # Registration flow
-            parts = message_text.split('|')
-            if len(parts) != 7:
+        
+        # Handle step-by-step registration
+        if user_id in self.pending_registration:
+            registration_state = self.pending_registration[user_id]
+            current_step = registration_state["step"]
+            data = registration_state["data"]
+            
+            # Process current step
+            if current_step == "first_name":
+                data["first_name"] = message_text
+                registration_state["step"] = "middle_name"
+                await update.message.reply_text("What is your middle name? (Type 'none' if you don't have one)")
+                
+            elif current_step == "middle_name":
+                if message_text.lower() == "none":
+                    data["middle_name"] = ""
+                else:
+                    data["middle_name"] = message_text
+                registration_state["step"] = "last_name"
+                await update.message.reply_text("What is your last name?")
+                
+            elif current_step == "last_name":
+                data["last_name"] = message_text
+                registration_state["step"] = "birth_date"
                 await update.message.reply_text(
-                    "❌ Please provide all details in the correct format:\n"
-                    "First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language")
-                return
-            first, middle, last, dob, tob, place, language = [p.strip() for p in parts]
-            if language not in ['en', 'mr']:
-                language = 'en'
-            chat_id = user_id
-            name = f"{first} {middle} {last}".strip()
-            from src.database.models import User
-            user = User(
-                telegram_id=user_id,
-                chat_id=chat_id,
-                name=name,
-                birth_date=dob,
-                birth_time=tob,
-                birth_place=place,
-                language_preference=language,
-                daily_reports_enabled=True,
-                realtime_guidance_enabled=True
-            )
-            db.create_user(user)
-            del self.pending_registration[user_id]
-            await update.message.reply_text(f"✅ Profile created for {name}! Use /profile to view.")
+                    "What is your date of birth? (Format: YYYY-MM-DD)\n\n"
+                    "Example: 1990-01-15")
+                
+            elif current_step == "birth_date":
+                # Validate date format
+                import re
+                if not re.match(r'^\d{4}-\d{2}-\d{2}$', message_text):
+                    await update.message.reply_text(
+                        "❌ Invalid date format. Please use YYYY-MM-DD format.\n"
+                        "Example: 1990-01-15")
+                    return
+                
+                data["birth_date"] = message_text
+                registration_state["step"] = "birth_time"
+                await update.message.reply_text(
+                    "What is your time of birth? (Format: HH:MM)\n\n"
+                    "Example: 14:30")
+                
+            elif current_step == "birth_time":
+                # Validate time format
+                import re
+                if not re.match(r'^\d{1,2}:\d{2}$', message_text):
+                    await update.message.reply_text(
+                        "❌ Invalid time format. Please use HH:MM format.\n"
+                        "Example: 14:30")
+                    return
+                
+                data["birth_time"] = message_text
+                registration_state["step"] = "birth_place"
+                await update.message.reply_text(
+                    "What is your place of birth?\n\n"
+                    "Example: Mumbai, India")
+                
+            elif current_step == "birth_place":
+                data["birth_place"] = message_text
+                registration_state["step"] = "language"
+                await update.message.reply_text(
+                    "What is your preferred language?\n\n"
+                    "Options:\n"
+                    "- en (English)\n"
+                    "- mr (Marathi)")
+                
+            elif current_step == "language":
+                language = message_text.lower()
+                if language not in ["en", "mr"]:
+                    await update.message.reply_text(
+                        "❌ Invalid language. Please choose 'en' for English or 'mr' for Marathi.")
+                    return
+                
+                data["language"] = language
+                registration_state["step"] = "confirmation"
+                
+                # Show summary for confirmation
+                first = data["first_name"]
+                middle = data["middle_name"]
+                last = data["last_name"]
+                name = f"{first} {middle} {last}".strip()
+                if middle == "":
+                    name = f"{first} {last}"
+                
+                summary = (
+                    f"📝 *Profile Summary*\n\n"
+                    f"Name: {name}\n"
+                    f"Date of Birth: {data['birth_date']}\n"
+                    f"Time of Birth: {data['birth_time']}\n"
+                    f"Place of Birth: {data['birth_place']}\n"
+                    f"Language: {data['language']}\n\n"
+                    f"Is this information correct? (yes/no)"
+                )
+                await update.message.reply_text(summary, parse_mode='Markdown')
+                
+            elif current_step == "confirmation":
+                if message_text.lower() == "yes":
+                    # Create user profile
+                    first = data["first_name"]
+                    middle = data["middle_name"]
+                    last = data["last_name"]
+                    name = f"{first} {middle} {last}".strip()
+                    if middle == "":
+                        name = f"{first} {last}"
+                    
+                    from src.database.models import User
+                    user = User(
+                        telegram_id=user_id,
+                        chat_id=user_id,
+                        name=name,
+                        birth_date=data["birth_date"],
+                        birth_time=data["birth_time"],
+                        birth_place=data["birth_place"],
+                        language_preference=data["language"],
+                        daily_reports_enabled=True,
+                        realtime_guidance_enabled=True
+                    )
+                    db.create_user(user)
+                    del self.pending_registration[user_id]
+                    await update.message.reply_text(f"✅ Profile created for {name}! Use /profile to view.")
+                else:
+                    # Restart registration
+                    await update.message.reply_text("Let's start over. What is your first name?")
+                    self.pending_registration[user_id] = {
+                        "step": "first_name",
+                        "data": {}
+                    }
             return
-        if self.pending_profile_update.get(user_id):
-            # Profile edit flow
-            parts = message_text.split('|')
-            if len(parts) != 7:
+        if user_id in self.pending_profile_update:
+            # Step-by-step profile update flow
+            update_state = self.pending_profile_update[user_id]
+            current_step = update_state["step"]
+            data = update_state["data"]
+            
+            # Process current step
+            if current_step == "first_name":
+                if message_text.lower() != "keep":
+                    data["first_name"] = message_text
+                update_state["step"] = "middle_name"
                 await update.message.reply_text(
-                    "❌ Please provide all details in the correct format:\n"
-                    "First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language")
-                return
-            first, middle, last, dob, tob, place, language = [p.strip() for p in parts]
-            if language not in ['en', 'mr']:
-                language = 'en'
-            chat_id = user_id
-            name = f"{first} {middle} {last}".strip()
-            from src.database.models import User
-            user = User(
-                telegram_id=user_id,
-                chat_id=chat_id,
-                name=name,
-                birth_date=dob,
-                birth_time=tob,
-                birth_place=place,
-                language_preference=language,
-                daily_reports_enabled=True,
-                realtime_guidance_enabled=True
-            )
-            db.update_user(user)
-            del self.pending_profile_update[user_id]
-            await update.message.reply_text(f"✅ Profile updated for {name}! Use /profile to view.")
+                    f"Your current middle name is: *{data['middle_name']}*\n"
+                    f"Enter your new middle name, type 'none' for no middle name, or type 'keep' to keep the current value:", 
+                    parse_mode='Markdown')
+                
+            elif current_step == "middle_name":
+                if message_text.lower() == "none":
+                    data["middle_name"] = ""
+                elif message_text.lower() != "keep":
+                    data["middle_name"] = message_text
+                update_state["step"] = "last_name"
+                await update.message.reply_text(
+                    f"Your current last name is: *{data['last_name']}*\n"
+                    f"Enter your new last name or type 'keep' to keep the current value:", 
+                    parse_mode='Markdown')
+                
+            elif current_step == "last_name":
+                if message_text.lower() != "keep":
+                    data["last_name"] = message_text
+                update_state["step"] = "birth_date"
+                await update.message.reply_text(
+                    f"Your current date of birth is: *{data['birth_date']}*\n"
+                    f"Enter your new date of birth (Format: YYYY-MM-DD) or type 'keep' to keep the current value:", 
+                    parse_mode='Markdown')
+                
+            elif current_step == "birth_date":
+                if message_text.lower() != "keep":
+                    # Validate date format
+                    import re
+                    if not re.match(r'^\d{4}-\d{2}-\d{2}$', message_text):
+                        await update.message.reply_text(
+                            "❌ Invalid date format. Please use YYYY-MM-DD format.\n"
+                            "Example: 1990-01-15\n"
+                            "Or type 'keep' to keep your current value.")
+                        return
+                    data["birth_date"] = message_text
+                
+                update_state["step"] = "birth_time"
+                await update.message.reply_text(
+                    f"Your current time of birth is: *{data['birth_time']}*\n"
+                    f"Enter your new time of birth (Format: HH:MM) or type 'keep' to keep the current value:", 
+                    parse_mode='Markdown')
+                
+            elif current_step == "birth_time":
+                if message_text.lower() != "keep":
+                    # Validate time format
+                    import re
+                    if not re.match(r'^\d{1,2}:\d{2}$', message_text):
+                        await update.message.reply_text(
+                            "❌ Invalid time format. Please use HH:MM format.\n"
+                            "Example: 14:30\n"
+                            "Or type 'keep' to keep your current value.")
+                        return
+                    data["birth_time"] = message_text
+                
+                update_state["step"] = "birth_place"
+                await update.message.reply_text(
+                    f"Your current place of birth is: *{data['birth_place']}*\n"
+                    f"Enter your new place of birth or type 'keep' to keep the current value:", 
+                    parse_mode='Markdown')
+                
+            elif current_step == "birth_place":
+                if message_text.lower() != "keep":
+                    data["birth_place"] = message_text
+                update_state["step"] = "language"
+                await update.message.reply_text(
+                    f"Your current language preference is: *{data['language']}*\n"
+                    f"Enter your new language preference (en/mr) or type 'keep' to keep the current value:\n\n"
+                    f"Options:\n"
+                    f"- en (English)\n"
+                    f"- mr (Marathi)", 
+                    parse_mode='Markdown')
+                
+            elif current_step == "language":
+                if message_text.lower() != "keep":
+                    language = message_text.lower()
+                    if language not in ["en", "mr"]:
+                        await update.message.reply_text(
+                            "❌ Invalid language. Please choose 'en' for English or 'mr' for Marathi.\n"
+                            "Or type 'keep' to keep your current value.")
+                        return
+                    data["language"] = language
+                
+                update_state["step"] = "confirmation"
+                
+                # Show summary for confirmation
+                first = data["first_name"]
+                middle = data["middle_name"]
+                last = data["last_name"]
+                name = f"{first} {middle} {last}".strip()
+                if middle == "":
+                    name = f"{first} {last}"
+                
+                summary = (
+                    f"📝 *Updated Profile Summary*\n\n"
+                    f"Name: {name}\n"
+                    f"Date of Birth: {data['birth_date']}\n"
+                    f"Time of Birth: {data['birth_time']}\n"
+                    f"Place of Birth: {data['birth_place']}\n"
+                    f"Language: {data['language']}\n\n"
+                    f"Is this information correct? (yes/no)"
+                )
+                await update.message.reply_text(summary, parse_mode='Markdown')
+                
+            elif current_step == "confirmation":
+                if message_text.lower() == "yes":
+                    # Update user profile
+                    first = data["first_name"]
+                    middle = data["middle_name"]
+                    last = data["last_name"]
+                    name = f"{first} {middle} {last}".strip()
+                    if middle == "":
+                        name = f"{first} {last}"
+                    
+                    from src.database.models import User
+                    user = User(
+                        telegram_id=user_id,
+                        chat_id=user_id,
+                        name=name,
+                        birth_date=data["birth_date"],
+                        birth_time=data["birth_time"],
+                        birth_place=data["birth_place"],
+                        language_preference=data["language"],
+                        daily_reports_enabled=True,
+                        realtime_guidance_enabled=True
+                    )
+                    db.update_user(user)
+                    del self.pending_profile_update[user_id]
+                    await update.message.reply_text(f"✅ Profile updated for {name}! Use /profile to view.")
+                else:
+                    # Restart profile update
+                    await update.message.reply_text("Let's start over. What is your first name?")
+                    # Re-initialize with existing data
+                    existing_user = db.get_user(user_id)
+                    name_parts = existing_user.name.split()
+                    first_name = name_parts[0] if name_parts else ""
+                    last_name = name_parts[-1] if len(name_parts) > 1 else ""
+                    middle_name = " ".join(name_parts[1:-1]) if len(name_parts) > 2 else ""
+                    
+                    self.pending_profile_update[user_id] = {
+                        "step": "first_name",
+                        "data": {
+                            "first_name": first_name,
+                            "middle_name": middle_name,
+                            "last_name": last_name,
+                            "birth_date": existing_user.birth_date,
+                            "birth_time": existing_user.birth_time,
+                            "birth_place": existing_user.birth_place,
+                            "language": existing_user.language_preference
+                        }
+                    }
+                    await update.message.reply_text(
+                        f"Your current first name is: *{first_name}*\n"
+                        f"Enter your new first name or type 'keep' to keep the current value:", 
+                        parse_mode='Markdown')
             return
         # Default: handle as general query
         user = db.get_user(user_id)
@@ -1046,6 +1300,7 @@ These remedies will bring harmony, health, and happiness to your life! ✨"""
 **🤖 AI Features:**
 /ai - Advanced AI chat
 /adaptive - Adaptive recommendations
+/test_openrouter - Test OpenRouter API connection
 
 **👨‍👩‍👧‍👦 Family:**
 /family_recommendations - Family guidance
@@ -1256,7 +1511,7 @@ Use these timings for best results! ✨"""
             await update.message.reply_text("❌ Error showing rituals. Please try again.")
 
     async def edit_profile_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle profile editing."""
+        """Handle profile editing with step-by-step approach."""
         if not update.effective_user or not update.message:
             return
         
@@ -1267,11 +1522,33 @@ Use these timings for best results! ✨"""
         if not existing_user:
             await update.message.reply_text("❌ Please register first using /register")
             return
-        self.pending_profile_update[user_id] = True
+        
+        # Get existing user data to pre-fill
+        name_parts = existing_user.name.split()
+        first_name = name_parts[0] if name_parts else ""
+        last_name = name_parts[-1] if len(name_parts) > 1 else ""
+        middle_name = " ".join(name_parts[1:-1]) if len(name_parts) > 2 else ""
+        
+        # Initialize profile update state with first step and pre-filled data
+        self.pending_profile_update[user_id] = {
+            "step": "first_name",
+            "data": {
+                "first_name": first_name,
+                "middle_name": middle_name,
+                "last_name": last_name,
+                "birth_date": existing_user.birth_date,
+                "birth_time": existing_user.birth_time,
+                "birth_place": existing_user.birth_place,
+                "language": existing_user.language_preference
+            }
+        }
+        
+        # Start the step-by-step profile update process
         await update.message.reply_text(
-            "✏️ Please enter your updated details in this format:\n"
-            "**First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language**\n\n"
-            "Example:\nJohn|A.|Doe|1990-01-15|14:30|Mumbai, India|en\n\nLanguage: en (English) or mr (Marathi)")
+            f"✏️ Let's update your profile step by step.\n\n"
+            f"Your current first name is: *{first_name}*\n"
+            f"Enter your new first name or type 'keep' to keep the current value:", 
+            parse_mode='Markdown')
 
     async def commands_list(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /commands command."""
@@ -1314,6 +1591,7 @@ Use these timings for best results! ✨"""
 **🤖 AI-Powered Chat:**
 /ai - Advanced AI chat (requires Ollama)
 /ai model:prompt - Use specific LLM model
+/test_openrouter - Test OpenRouter API connection
 
 **💫 Personal Guidance:**
 /personal - Personal life guidance
@@ -1399,70 +1677,159 @@ Use these timings for best results! ✨"""
             await update.message.reply_text("❌ Error showing family members. Please try again.")
 
     async def ai_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Handle /ai command for LLM-powered chat via Ollama."""
+        """Handle /ai command for LLM-powered chat via OpenRouter or Ollama."""
         if not update.effective_user or not update.message:
             return
         
+        from src.utils.config_simple import get_llm_config
+        llm_config = get_llm_config()
+        provider = llm_config.provider
+        
         prompt = update.message.text[len('/ai'):].strip()
         if not prompt:
-            await update.message.reply_text(
-                "🤖 **AI Chat Help**\n\n"
-                "**Usage:**\n"
-                "• `/ai What is my astrological forecast today?`\n"
-                "• `/ai mistral:Give me a prediction for next week`\n"
-                "• `/ai llama3:How can I improve my relationships?`\n\n"
-                "**Available Models:** llama3, mistral, codellama, phi3, gemma\n\n"
-                "**Setup Required:** Install Ollama and run `ollama serve` locally."
-            )
+            # Show help based on configured provider
+            if provider == "openrouter":
+                await update.message.reply_text(
+                    "🤖 **AI Chat Help**\n\n"
+                    "**Usage:**\n"
+                    "• `/ai What is my astrological forecast today?`\n"
+                    "• `/ai gpt-3.5:Give me a prediction for next week`\n"
+                    "• `/ai claude:How can I improve my relationships?`\n\n"
+                    "**Available Models:** gpt-3.5, gpt-4, claude, llama, mistral\n\n"
+                    "Using OpenRouter for AI chat capabilities."
+                )
+            else:  # ollama
+                await update.message.reply_text(
+                    "🤖 **AI Chat Help**\n\n"
+                    "**Usage:**\n"
+                    "• `/ai What is my astrological forecast today?`\n"
+                    "• `/ai mistral:Give me a prediction for next week`\n"
+                    "• `/ai llama3:How can I improve my relationships?`\n\n"
+                    "**Available Models:** llama3, mistral, codellama, phi3, gemma\n\n"
+                    "**Setup Required:** Install Ollama and run `ollama serve` locally."
+                )
             return
         
-        # Model selection: /ai model:prompt
-        if ':' in prompt and prompt.split(':', 1)[0].lower() in ['llama3', 'mistral', 'codellama', 'phi3', 'gemma']:
-            model, prompt = prompt.split(':', 1)
-            model = model.strip().lower()
-            prompt = prompt.strip()
-        else:
-            model = 'llama3'
+        # Process model selection from prompt
+        model = None
+        if ':' in prompt:
+            model_prefix, prompt_text = prompt.split(':', 1)
+            model_prefix = model_prefix.strip().lower()
+            prompt = prompt_text.strip()
+            
+            # Map model prefix to actual model name based on provider
+            if provider == "openrouter":
+                model_mapping = {
+                    'gpt-3.5': 'openai/gpt-3.5-turbo',
+                    'gpt-4': 'openai/gpt-4',
+                    'claude': 'anthropic/claude-3-haiku',
+                    'llama': 'meta-llama/llama-3-8b-instruct',
+                    'mistral': 'mistralai/mistral-7b-instruct'
+                }
+                model = model_mapping.get(model_prefix, llm_config.openrouter_default_model)
+            else:  # ollama
+                if model_prefix in ['llama3', 'mistral', 'codellama', 'phi3', 'gemma']:
+                    model = model_prefix
+                else:
+                    model = llm_config.ollama_default_model
+        
+        # Use default model if none specified
+        if not model:
+            model = llm_config.openrouter_default_model if provider == "openrouter" else llm_config.ollama_default_model
         
         try:
-            from src.utils.ollama_client import OllamaClient
-            ollama = OllamaClient()
-            
-            # Check if Ollama is available
-            await update.message.reply_text(f"🤖 Thinking... (using {model} on Ollama)")
-            
-            response = ollama.chat(prompt, model=model)
+            # Use appropriate client based on provider
+            if provider == "openrouter":
+                from src.utils.openrouter_client import OpenRouterClient
+                
+                # Get API key from config
+                api_key = llm_config.openrouter_api_key
+                if not api_key or not api_key.get_secret_value():
+                    await update.message.reply_text(
+                        "❌ **OpenRouter API Key Missing**\n\n"
+                        "Please set your OpenRouter API key in the environment variables:\n"
+                        "```\nLLM_OPENROUTER_API_KEY=your_api_key_here\n```\n\n"
+                        "Get your API key at: [openrouter.ai](https://openrouter.ai)"
+                    )
+                    return
+                
+                client = OpenRouterClient(api_key=api_key.get_secret_value())
+                await update.message.reply_text(f"🤖 Thinking... (using {model} on OpenRouter)")
+                
+                # Get system prompt from config
+                system_prompt = llm_config.system_prompt
+                
+                response = client.chat(prompt, model=model, system_prompt=system_prompt)
+            else:  # ollama
+                from src.utils.ollama_client import OllamaClient
+                
+                client = OllamaClient(host=llm_config.ollama_host)
+                await update.message.reply_text(f"🤖 Thinking... (using {model} on Ollama)")
+                
+                # Get system prompt from config
+                system_prompt = llm_config.system_prompt
+                
+                response = client.chat(prompt, model=model, system_prompt=system_prompt)
             
             if response and response.strip():
                 await update.message.reply_text(response)
             else:
-                await update.message.reply_text(
-                    "❌ **Ollama Error**\n\n"
-                    "**Possible Issues:**\n"
-                    "• Ollama server not running\n"
-                    "• Model not downloaded\n"
-                    "• Network connection issue\n\n"
-                    "**Solutions:**\n"
-                    "1. Start Ollama: `ollama serve`\n"
-                    "2. Download model: `ollama pull {model}`\n"
-                    "3. Check your internet connection\n\n"
-                    "**Fallback:** Try our regular commands like `/daily` or `/personal` for guidance!"
-                )
+                if provider == "openrouter":
+                    await update.message.reply_text(
+                        "❌ **OpenRouter Error**\n\n"
+                        "**Possible Issues:**\n"
+                        "• Invalid API key\n"
+                        "• Model not available\n"
+                        "• Network connection issue\n\n"
+                        "**Solutions:**\n"
+                        "1. Check your API key\n"
+                        "2. Try a different model\n"
+                        "3. Check your internet connection\n\n"
+                        "**Fallback:** Try our regular commands like `/daily` or `/personal` for guidance!"
+                    )
+                else:  # ollama
+                    await update.message.reply_text(
+                        "❌ **Ollama Error**\n\n"
+                        "**Possible Issues:**\n"
+                        "• Ollama server not running\n"
+                        "• Model not downloaded\n"
+                        "• Network connection issue\n\n"
+                        "**Solutions:**\n"
+                        "1. Start Ollama: `ollama serve`\n"
+                        "2. Download model: `ollama pull {model}`\n"
+                        "3. Check your internet connection\n\n"
+                        "**Fallback:** Try our regular commands like `/daily` or `/personal` for guidance!"
+                    )
                 
         except requests.exceptions.ConnectionError:
-            await update.message.reply_text(
-                "❌ **Ollama Connection Error**\n\n"
-                "**Ollama server is not running or not accessible.**\n\n"
-                "**To fix this:**\n"
-                "1. Install Ollama: [ollama.ai](https://ollama.ai)\n"
-                "2. Start server: `ollama serve`\n"
-                "3. Download model: `ollama pull {model}`\n\n"
-                "**For now, try:**\n"
-                "• `/daily` - Daily prediction\n"
-                "• `/personal` - Personal guidance\n"
-                "• `/family` - Family advice\n\n"
-                "Your astrology companion works perfectly without AI chat! ✨"
-            )
+            if provider == "openrouter":
+                await update.message.reply_text(
+                    "❌ **OpenRouter Connection Error**\n\n"
+                    "**Could not connect to OpenRouter API.**\n\n"
+                    "**To fix this:**\n"
+                    "1. Check your internet connection\n"
+                    "2. Verify your API key\n"
+                    "3. Try again later (service might be down)\n\n"
+                    "**For now, try:**\n"
+                    "• `/daily` - Daily prediction\n"
+                    "• `/personal` - Personal guidance\n"
+                    "• `/family` - Family advice\n\n"
+                    "Your astrology companion works perfectly without AI chat! ✨"
+                )
+            else:  # ollama
+                await update.message.reply_text(
+                    "❌ **Ollama Connection Error**\n\n"
+                    "**Ollama server is not running or not accessible.**\n\n"
+                    "**To fix this:**\n"
+                    "1. Install Ollama: [ollama.ai](https://ollama.ai)\n"
+                    "2. Start server: `ollama serve`\n"
+                    "3. Download model: `ollama pull {model}`\n\n"
+                    "**For now, try:**\n"
+                    "• `/daily` - Daily prediction\n"
+                    "• `/personal` - Personal guidance\n"
+                    "• `/family` - Family advice\n\n"
+                    "Your astrology companion works perfectly without AI chat! ✨"
+                )
             
         except Exception as e:
             logger.error(f"AI command error: {e}")
@@ -1898,6 +2265,66 @@ Current planetary transits influence your:
             logger.error(f"Error running bot: {e}")
             raise
 
+    async def test_openrouter_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle /test_openrouter command to test OpenRouter API connection."""
+        if not update.effective_user or not update.message:
+            return
+            
+        # Check if user is admin (optional security measure)
+        user_id = str(update.effective_user.id)
+        # You can implement admin check here if needed
+        
+        await update.message.reply_text("🔄 Testing OpenRouter API connection...")
+        
+        try:
+            from src.utils.config_simple import get_llm_config
+            from src.utils.openrouter_client import OpenRouterClient
+            
+            llm_config = get_llm_config()
+            
+            # Check if OpenRouter is configured as the provider
+            if llm_config.provider != "openrouter":
+                await update.message.reply_text(
+                    "❌ **OpenRouter Test Failed**\n\n"
+                    f"Current LLM provider is set to '{llm_config.provider}', not 'openrouter'.\n"
+                    "Please update your configuration to use OpenRouter."
+                )
+                return
+                
+            # Check if API key is configured
+            if not llm_config.openrouter_api_key:
+                await update.message.reply_text(
+                    "❌ **OpenRouter Test Failed**\n\n"
+                    "OpenRouter API key is not configured.\n"
+                    "Please set the LLM_OPENROUTER_API_KEY environment variable."
+                )
+                return
+                
+            # Create OpenRouter client and test connection
+            client = OpenRouterClient(llm_config.openrouter_api_key.get_secret_value())
+            success, message = client.test_connection()
+            
+            if success:
+                await update.message.reply_text(
+                    "✅ **OpenRouter Connection Successful**\n\n"
+                    f"{message}\n\n"
+                    "You can now use the /ai command for AI-powered chat."
+                )
+            else:
+                await update.message.reply_text(
+                    "❌ **OpenRouter Test Failed**\n\n"
+                    f"Error: {message}\n\n"
+                    "Please check your API key and try again."
+                )
+                
+        except Exception as e:
+            logger.error(f"OpenRouter test error: {e}")
+            await update.message.reply_text(
+                "❌ **OpenRouter Test Error**\n\n"
+                f"An unexpected error occurred: {str(e)}\n"
+                "Please check your configuration and try again."
+            )
+    
     async def run(self):
         """Run the bot asynchronously."""
         try:
@@ -1917,4 +2344,4 @@ Current planetary transits influence your:
 
 
 # Global bot instance
-bot = SimpleAstroBot() 
+bot = SimpleAstroBot()

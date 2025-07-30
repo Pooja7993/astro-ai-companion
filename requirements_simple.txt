@@ -9,6 +9,7 @@ flask>=2.3.0
 
 # Database
 sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9  # PostgreSQL adapter for Render deployment
 
 # Configuration
 pydantic>=2.5.0
@@ -20,6 +21,7 @@ loguru>=0.7.2
 
 # HTTP Client
 httpx>=0.25.2
+requests>=2.31.0  # For OpenRouter API calls
 
 # Data Processing
 pandas>=2.0.0
@@ -40,4 +42,4 @@ pytest-asyncio>=0.21.0
 
 # Development
 black>=23.11.0
-flake8>=6.1.0 
+flake8>=6.1.0

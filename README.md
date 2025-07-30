@@ -13,8 +13,8 @@
 - **Personal Guidance** - Health, relationships, spiritual growth, life purpose
 
 ### **🤖 AI-Powered Features:**
-- **Local LLM Chat** - Natural, context-aware conversations via Ollama
-- **Model Selection** - Use Llama 3, Mistral, CodeLlama, and other models
+- **Flexible LLM Chat** - Natural, context-aware conversations via OpenRouter or Ollama
+- **Model Selection** - Use GPT-3.5, GPT-4, Claude, Llama 3, Mistral, and other models
 - **Adaptive Learning** - Learns from your feedback to personalize recommendations
 - **Smart Predictions** - AI-enhanced daily predictions based on your preferences
 
@@ -57,6 +57,10 @@ Create a `.env` file:
 ```env
 telegram_bot_token=your_bot_token_here
 telegram_chat_id=5929651379
+
+# For OpenRouter (recommended for AI chat)
+LLM_OPENROUTER_API_KEY=your_api_key_here
+LLM_PROVIDER=openrouter
 ```
 
 ### **4. Run Locally**
@@ -64,7 +68,28 @@ telegram_chat_id=5929651379
 python run_simple.py
 ```
 
-## 🤖 **Ollama Setup (For AI Chat)**
+## 🤖 **AI Chat Setup**
+
+### **Option 1: OpenRouter Setup (Recommended)**
+
+### **1. Get OpenRouter API Key**
+- Create an account at [openrouter.ai](https://openrouter.ai)
+- Generate an API key
+
+### **2. Set Environment Variable**
+Add to your `.env` file:
+```env
+LLM_OPENROUTER_API_KEY=your_api_key_here
+LLM_PROVIDER=openrouter
+```
+
+### **3. Test AI Chat**
+In your bot, use:
+- `/ai What is my astrological forecast today?`
+- `/ai gpt-3.5:Give me a prediction for next week`
+- `/ai claude:How can I improve my relationships?`
+
+### **Option 2: Ollama Setup (Local)**
 
 ### **1. Install Ollama**
 - **Windows:** Download from [ollama.ai](https://ollama.ai)
@@ -82,7 +107,13 @@ ollama pull codellama
 ollama serve
 ```
 
-### **4. Test AI Chat**
+### **4. Set Environment Variable (Optional)**
+Add to your `.env` file to use Ollama instead of OpenRouter:
+```env
+LLM_PROVIDER=ollama
+```
+
+### **5. Test AI Chat**
 In your bot, use:
 - `/ai What is my astrological forecast today?`
 - `/ai mistral:Give me a prediction for next week`
