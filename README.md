@@ -1,254 +1,234 @@
-# 🌟 Astro AI Companion - Personal Family Edition
+# 🌟 Astro AI Companion - Complete Family Astrology System
 
-**Your advanced personal family astrology companion with AI-powered insights, deep analytics, and adaptive learning!**
+A comprehensive family astrology system that combines **Vedic Astrology**, **Numerology**, and **Lal Kitab** to provide unified guidance for each family member through personalized Telegram chats and a modern web interface.
 
-## ✨ **Features**
+## ✨ Features
 
-### **🎯 Core Astrology Features:**
-- **Birth Chart Analysis** - Personalized planetary positions and zodiac signs
-- **Advanced Analytics** - Dasha, transits, yogas, and comprehensive chart analysis
-- **Daily Predictions** - Cosmic insights with advanced astrology calculations
-- **Family Recommendations** - Simple remedies and warnings for family harmony
-- **Multi-language Support** - English and Marathi
-- **Personal Guidance** - Health, relationships, spiritual growth, life purpose
+### 🎯 **Unified Astrological System**
+- **Vedic Astrology**: Planetary positions, Nakshatras, Dashas
+- **Numerology**: Life Path, Destiny, and Soul numbers
+- **Lal Kitab**: Practical remedies and karmic debt analysis
+- **AI-Powered**: OpenRouter integration for natural language guidance
 
-### **🤖 AI-Powered Features:**
-- **Flexible LLM Chat** - Natural, context-aware conversations via OpenRouter or Ollama
-- **Model Selection** - Use GPT-3.5, GPT-4, Claude, Llama 3, Mistral, and other models
-- **Adaptive Learning** - Learns from your feedback to personalize recommendations
-- **Smart Predictions** - AI-enhanced daily predictions based on your preferences
+### 👨‍👩‍👧‍👦 **Family-Centric Design**
+- Individual profiles for each family member
+- Personal Telegram chat for each member
+- Family harmony guidance and compatibility
+- Unified dashboard for family management
 
-### **🖼️ Voice & Visualization:**
-- **Birth Chart Images** - Beautiful visual birth charts
-- **Prediction Images** - Styled prediction graphics
-- **Voice Predictions** - Text-to-speech ready for future
-- **Chart Visualization** - Professional astrology charts
+### 💬 **Natural Chat Interface**
+- Telegram bot with natural language processing
+- No commands needed - just chat naturally
+- Personalized responses based on astrological profile
+- Real-time guidance and daily insights
 
-### **👨‍👩‍👧‍👦 Family Features:**
-- **Family Member Management** - Add and manage family members
-- **Individual Telegram Access** - Each family member gets personal guidance
-- **Family Compatibility** - Analyze relationships and harmony
-- **Simple Recommendations** - One remedy and warnings for peace
-- **Language Preferences** - Each member can choose English or Marathi
+### 🌐 **Modern Web UI**
+- Beautiful, responsive web interface
+- Real-time updates with WebSocket
+- Family member management
+- Astrological profile visualization
 
-### **🚀 Advanced Features:**
-- **Daily Reminders** - Automated morning and evening guidance
-- **Progress Tracking** - Track mood, harmony, health, spiritual growth
-- **Goal Setting** - Set and track personal and family goals
-- **Advanced Personalization** - Learns from your feedback and adapts
-- **Enhanced Notifications** - Smart alerts for important events
-- **Stateful Registration** - Edit profiles with first/middle/last name support
+## 🚀 **Render Deployment**
 
-## 🛠️ **Quick Setup**
+### **Prerequisites**
+1. **Render Account**: Sign up at [render.com](https://render.com)
+2. **OpenRouter API Key**: Get free API key from [openrouter.ai](https://openrouter.ai)
+3. **Telegram Bot**: Create bot with [@BotFather](https://t.me/botfather)
 
-### **1. Clone Repository**
+### **One-Click Deploy**
+1. Fork this repository
+2. Connect to Render
+3. Use the `render.yaml` blueprint
+4. Set environment variables:
+   - `OPENROUTER_API_KEY`: Your OpenRouter API key
+   - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
+
+### **Manual Setup**
+
+#### **1. Database Setup**
 ```bash
-git clone https://github.com/Pooja7993/astro-ai-companion.git
+# Render automatically creates PostgreSQL database
+# Connection string is provided via DATABASE_URL
+```
+
+#### **2. Web Service**
+- **Build Command**: `pip install -r requirements.txt && python -c "from src.config.database import init_database; init_database()"`
+- **Start Command**: `python src/web/app.py`
+- **Environment**: Python 3.11
+
+#### **3. Telegram Bot Service**
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `python run_bot.py`
+- **Environment**: Python 3.11
+
+#### **4. Environment Variables**
+```env
+DATABASE_URL=postgresql://... (auto-provided by Render)
+OPENROUTER_API_KEY=your_openrouter_key
+TELEGRAM_BOT_TOKEN=your_bot_token
+SECRET_KEY=auto-generated
+ENVIRONMENT=production
+```
+
+## 📱 **Usage**
+
+### **Web Interface**
+1. Visit your Render app URL
+2. Register family members
+3. View unified astrological profiles
+4. Chat with AI assistant
+5. Manage family harmony guidance
+
+### **Telegram Bot**
+1. Start chat with your bot
+2. Register with: `FirstName|MiddleName|LastName|YYYY-MM-DD|HH:MM|City,Country|relationship`
+3. Chat naturally for personalized guidance
+4. Each family member gets their own chat experience
+
+### **Example Registration**
+```
+John|Kumar|Sharma|1990-05-15|14:30|Mumbai,India|head
+```
+
+## 🔮 **Astrological Systems**
+
+### **Vedic Astrology**
+- Precise planetary calculations using Swiss Ephemeris
+- Nakshatra (lunar mansion) analysis
+- House positions and aspects
+- Dasha (planetary period) calculations
+
+### **Numerology**
+- Life Path Number from birth date
+- Destiny Number from full name
+- Soul Number from vowels in name
+- Personal year and cycle analysis
+
+### **Lal Kitab**
+- Karmic debt analysis
+- Practical remedies and solutions
+- House-based predictions
+- Simple, actionable guidance
+
+## 🛠 **Technical Architecture**
+
+### **Backend**
+- **Flask**: Web framework with WebSocket support
+- **SQLAlchemy**: PostgreSQL ORM
+- **Swiss Ephemeris**: Astronomical calculations
+- **OpenRouter**: Free LLM integration
+- **Python Telegram Bot**: Async bot framework
+
+### **Frontend**
+- **Bootstrap 5**: Responsive UI framework
+- **Socket.IO**: Real-time updates
+- **Vanilla JavaScript**: No heavy frameworks
+- **Progressive Web App**: Mobile-friendly
+
+### **Database Schema**
+- **Users**: Family member profiles
+- **Families**: Family groupings
+- **BirthCharts**: Astrological data
+- **Predictions**: Generated guidance
+
+## 🔧 **Development**
+
+### **Local Setup**
+```bash
+# Clone repository
+git clone <your-repo-url>
 cd astro-ai-companion
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variables
+cp .env.example .env
+# Edit .env with your keys
+
+# Initialize database
+python -c "from src.config.database import init_database; init_database()"
+
+# Run web app
+python src/web/app.py
+
+# Run Telegram bot (separate terminal)
+python run_bot.py
 ```
 
-### **2. Install Dependencies**
-```bash
-pip install -r requirements_simple.txt
+### **Project Structure**
+```
+src/
+├── config/          # Database configuration
+├── models/          # SQLAlchemy models
+├── services/        # Business logic services
+├── telegram_bot/    # Telegram bot implementation
+├── web/            # Flask web application
+│   ├── templates/  # HTML templates
+│   └── app.py     # Main Flask app
+└── utils/          # Utility functions
+
+requirements.txt     # Python dependencies
+render.yaml         # Render deployment config
+run_bot.py          # Telegram bot runner
 ```
 
-### **3. Set Environment Variables**
-Create a `.env` file:
-```env
-telegram_bot_token=your_bot_token_here
-telegram_chat_id=5929651379
+## 🌟 **Key Features**
 
-# For OpenRouter (recommended for AI chat)
-LLM_OPENROUTER_API_KEY=your_api_key_here
-LLM_PROVIDER=openrouter
-```
+### **For Families**
+- ✅ Each member gets personalized guidance
+- ✅ Individual Telegram chats
+- ✅ Family harmony analysis
+- ✅ Unified astrological insights
+- ✅ Daily guidance and reminders
 
-### **4. Run Locally**
-```bash
-python run_simple.py
-```
+### **For Developers**
+- ✅ Modern Python architecture
+- ✅ PostgreSQL database
+- ✅ Free LLM integration
+- ✅ Render-optimized deployment
+- ✅ Scalable and maintainable
 
-## 🤖 **AI Chat Setup**
+### **For Users**
+- ✅ Natural chat interface
+- ✅ No complex commands
+- ✅ Beautiful web dashboard
+- ✅ Real-time updates
+- ✅ Mobile-friendly design
 
-### **Option 1: OpenRouter Setup (Recommended)**
+## 📊 **Cost Optimization**
 
-### **1. Get OpenRouter API Key**
-- Create an account at [openrouter.ai](https://openrouter.ai)
-- Generate an API key
+### **Free Tier Usage**
+- **Render**: Free web service + PostgreSQL
+- **OpenRouter**: Free LLM API calls
+- **Telegram**: Free bot platform
+- **Total Monthly Cost**: $0 for moderate usage
 
-### **2. Set Environment Variable**
-Add to your `.env` file:
-```env
-LLM_OPENROUTER_API_KEY=your_api_key_here
-LLM_PROVIDER=openrouter
-```
+### **Scaling Options**
+- Render paid plans for higher traffic
+- OpenRouter paid models for better AI
+- Additional database storage as needed
 
-### **3. Test AI Chat**
-In your bot, use:
-- `/ai What is my astrological forecast today?`
-- `/ai gpt-3.5:Give me a prediction for next week`
-- `/ai claude:How can I improve my relationships?`
+## 🤝 **Contributing**
 
-### **Option 2: Ollama Setup (Local)**
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Test thoroughly
+5. Submit pull request
 
-### **1. Install Ollama**
-- **Windows:** Download from [ollama.ai](https://ollama.ai)
-- **Mac/Linux:** `curl -fsSL https://ollama.ai/install.sh | sh`
+## 📄 **License**
 
-### **2. Download Models**
-```bash
-ollama pull llama3
-ollama pull mistral
-ollama pull codellama
-```
+MIT License - see LICENSE file for details.
 
-### **3. Start Ollama**
-```bash
-ollama serve
-```
+## 🆘 **Support**
 
-### **4. Set Environment Variable (Optional)**
-Add to your `.env` file to use Ollama instead of OpenRouter:
-```env
-LLM_PROVIDER=ollama
-```
+- **Issues**: GitHub Issues
+- **Documentation**: README.md
+- **Community**: Discussions tab
 
-### **5. Test AI Chat**
-In your bot, use:
-- `/ai What is my astrological forecast today?`
-- `/ai mistral:Give me a prediction for next week`
+---
 
-## 🚀 **Deploy to Render**
+**Made with ❤️ for families seeking cosmic guidance**
 
-### **1. Create Render Account**
-- Go to [render.com](https://render.com)
-- Sign up with GitHub
-
-### **2. Create Web Service**
-- Click "New +" → "Web Service"
-- Connect to your GitHub repository
-- Set build command: `pip install -r requirements_simple.txt`
-- Set start command: `python run_simple.py`
-
-### **3. Set Environment Variables**
-In Render dashboard, add:
-- `telegram_bot_token=your_bot_token_here`
-- `telegram_chat_id=5929651379`
-
-### **4. Deploy**
-- Click "Create Web Service"
-- Monitor deployment logs
-- Test your bot on Telegram
-
-## 📱 **Complete Bot Commands**
-
-### **🎯 Basic Commands:**
-- `/start` - Welcome message and introduction
-- `/register` - Create your personal profile
-- `/edit_profile` - Update your profile details
-- `/profile` - View your personal details
-- `/commands` - Complete list of all commands
-- `/help` - Show help guide
-
-### **📅 Prediction Commands:**
-- `/daily` - Today's cosmic guidance (with advanced analytics & adaptive learning)
-- `/weekly` - This week's forecast
-- `/monthly` - Monthly overview
-- `/yearly` - Annual predictions
-
-### **🔮 Advanced Analytics:**
-- `/analytics` - Comprehensive astrology analysis
-- `/dasha` - Current dasha period information
-- `/transits` - Current planetary transits
-- `/yogas` - Active yogas in your chart
-
-### **🖼️ Voice & Chart Features:**
-- `/chart` - Generate your birth chart image
-- `/prediction_image` - Get prediction as beautiful image
-- `/voice_prediction` - Voice prediction (coming soon)
-
-### **🤖 AI-Powered Chat:**
-- `/ai` - Advanced AI chat (requires Ollama)
-- `/ai model:prompt` - Use specific LLM model (llama3, mistral, codellama)
-
-### **💫 Personal Guidance:**
-- `/personal` - Personal life guidance
-- `/family` - Family and relationship insights
-- `/health` - Health and wellness guidance
-- `/relationships` - Love and relationship advice
-- `/spiritual` - Spiritual growth guidance
-- `/life_purpose` - Life purpose and career guidance
-
-### **👨‍👩‍👧‍👦 Family Commands:**
-- `/family_recommendations` - Family peace, harmony, health, wealth & happiness
-- `/family_members` - View registered family members
-
-### **🔮 Consultation Commands:**
-- `/ask [question]` - Ask specific questions
-- `/remedies` - Personalized remedies
-
-### **📊 Optional Enhancements:**
-- `/progress` - Track your progress and achievements
-- `/goals` - View and manage your goals
-- `/set_goal` - Set new family or personal goals
-- `/timing` - Get personalized timing recommendations
-- `/rituals` - View custom family rituals
-
-### **🤖 AI & Learning:**
-- `/adaptive` - Get personalized adaptive recommendations
-
-## 💡 **Usage Examples**
-
-### **Registration:**
-```
-/register
-Enter: First Name|Middle Name|Last Name|Date of Birth|Time of Birth|Place of Birth|Language
-Example: John|A.|Doe|1990-01-15|14:30|Mumbai, India|en
-```
-
-### **AI Chat:**
-```
-/ai What should I focus on today?
-/ai mistral:Give me a health prediction
-/ai codellama:How can I improve my relationships?
-```
-
-### **Advanced Analytics:**
-```
-/analytics - Get comprehensive chart analysis
-/dasha - Check your current dasha period
-/transits - See current planetary positions
-/yogas - Discover active yogas in your chart
-```
-
-### **Natural Conversation:**
-Just type anything naturally! The bot will provide personalized guidance based on your birth chart and preferences.
-
-## 🌟 **Advanced Features**
-
-### **Adaptive Learning:**
-- Rate predictions with 👍 or 👎
-- Bot learns your preferences
-- Personalized recommendations improve over time
-- Family-specific guidance for each member
-
-### **Privacy & Security:**
-- All data stored locally or on your server
-- No third-party AI services (unless you choose)
-- Family data is private and secure
-- No cloud dependencies for core features
-
-### **Multi-language Support:**
-- English (en) - Default language
-- Marathi (mr) - Full support
-- Each family member can choose their preferred language
-
-## 🚀 **Deployment Status**
-
-✅ **Ready for Production**
-- All features implemented and tested
-- Render deployment guide included
-- Error handling and graceful fallbacks
-- Family-focused and privacy-first
-
-**Your personal family astrology companion is ready to bring peace, harmony, health, wealth, and happiness to your family!** ✨
+🌟 **Start your family's astrological journey today!** 🌟
